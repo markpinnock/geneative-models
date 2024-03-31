@@ -18,7 +18,7 @@ It can also be installed using `conda`:
 (generative) C:\User\generative-models> pip install -r requirements.txt
 ```
 
-In some cases, Conda may not set up the `LD_LIBRARY_PATH` environment variable properly, leading to Tensorflow library errors on import. In this case, `LD_LIBRARY_PATH` should be set manually:
+In some cases (due to a bug in the TF 2.16 pip installation), Conda may not set up the `LD_LIBRARY_PATH` environment variable properly, leading to Tensorflow library errors on import. In this case, `LD_LIBRARY_PATH` should be set manually:
 
 ```shell
 (generative) user@account:~/generative-models$ conda env config vars set LD_LIBRARY_PATH=$CONDA_PREFIX/lib/python3.11/site-packages/nvidia/cublas/lib:$CONDA_PREFIX/lib/python3.11/site-packages/nvidia/cuda_cupti/lib:$CONDA_PREFIX/lib/python3.11/site-packages/nvidia/cuda_nvcc/lib:$CONDA_PREFIX/lib/python3.11/site-packages/nvidia/cuda_nvrtc/lib:$CONDA_PREFIX/lib/python3.11/site-packages/nvidia/cuda_runtime/lib:$CONDA_PREFIX/lib/python3.11/site-packages/nvidia/cudnn/lib:$CONDA_PREFIX/lib/python3.11/site-packages/nvidia/cufft/lib:$CONDA_PREFIX/lib/python3.11/site-packages/nvidia/curand/lib:$CONDA_PREFIX/lib/python3.11/site-packages/nvidia/cusolver/lib:$CONDA_PREFIX/lib/python3.11/site-packages/nvidia/cusparse/lib
