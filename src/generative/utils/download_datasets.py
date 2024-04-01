@@ -5,7 +5,6 @@ from pathlib import Path
 
 import keras
 import numpy as np
-
 from generative.utils.logger import get_logger
 
 logger = get_logger(__name__)
