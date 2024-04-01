@@ -14,8 +14,8 @@ dependencies = [
 
 requires-python = ">=3.10,<3.13"
 
-# [tool.setuptools.packages.find]
-# where = ["src"]
+[tool.setuptools]
+packages = ["generative"]
 
 [project.optional-dependencies]
 typing = [
@@ -29,5 +29,5 @@ test = [
     "pytest==8.1.1"
 ]
 
-# [project.scripts]
-# tool = "template.cli.tool:main"
+[project.scripts]
+download_datasets = "generative.utils.download_datasets:main"
