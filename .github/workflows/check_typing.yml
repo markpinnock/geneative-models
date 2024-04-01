@@ -16,4 +16,4 @@ jobs:
         run: pip install tox
 
       - name: Run mypy
-        run: tox -e py312-mypy
+        run: tox -e py311-mypy

@@ -16,4 +16,4 @@ jobs:
         run: pip install tox
 
       - name: Check quality
-        run: tox -e py312-quality
+        run: tox -e py311-quality
