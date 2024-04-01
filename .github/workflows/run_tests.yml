@@ -16,4 +16,4 @@ jobs:
         run: pip install tox
 
       - name: Run pytest
-        run: tox -e py312-pytest
+        run: tox -e py311-pytest
