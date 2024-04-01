@@ -30,4 +30,4 @@ test = [
 ]
 
 [project.scripts]
-download_datasets = "generative.utils.download_datasets:main"
+download_datasets = "generative.common.download_datasets:main"
