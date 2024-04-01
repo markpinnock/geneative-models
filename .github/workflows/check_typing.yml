@@ -10,10 +10,10 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.12"
+          python-version: "3.11"
 
       - name: Install tox
         run: pip install tox
 
       - name: Run mypy
-        run: tox -e py312-mypy
+        run: tox -e py311-mypy

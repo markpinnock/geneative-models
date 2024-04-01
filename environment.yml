@@ -2,9 +2,23 @@ name: generative
 channels:
   - conda-forge
 dependencies:
-  - python=3.12.2
+  - python=3.11.8
   - pip=24.0
   - mypy=1.9.0
   - pre-commit=3.7.0
   - pytest=8.1.1
   - tox=4.14.2
+  - pip:
+    - tensorflow[and-cuda]==2.16.1
+variables:
+  LD_LIBRARY_PATH: >-
+      $CONDA_PREFIX/lib/python3.11/site-packages/nvidia/cublas/lib:
+      $CONDA_PREFIX/lib/python3.11/site-packages/nvidia/cuda_cupti/lib:
+      $CONDA_PREFIX/lib/python3.11/site-packages/nvidia/cuda_nvcc/lib:
+      $CONDA_PREFIX/lib/python3.11/site-packages/nvidia/cuda_nvrtc/lib:
+      $CONDA_PREFIX/lib/python3.11/site-packages/nvidia/cuda_runtime/lib:
+      $CONDA_PREFIX/lib/python3.11/site-packages/nvidia/cudnn/lib:
+      $CONDA_PREFIX/lib/python3.11/site-packages/nvidia/cufft/lib:
+      $CONDA_PREFIX/lib/python3.11/site-packages/nvidia/curand/lib:
+      $CONDA_PREFIX/lib/python3.11/site-packages/nvidia/cusolver/lib:
+      $CONDA_PREFIX/lib/python3.11/site-packages/nvidia/cusparse/lib
