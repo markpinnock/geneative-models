@@ -12,6 +12,15 @@ class Datasets(str, enum.Enum):
 
 
 @enum.unique
+class DataSplits(str, enum.Enum):
+    """Dataset split types."""
+
+    TRAIN = "train"
+    VALID = "validation"
+    TEST = "test"
+
+
+@enum.unique
 class Normalisation(str, enum.Enum):
     """Normalisation types."""
 
