@@ -24,5 +24,5 @@ class DataSplits(str, enum.Enum):
 class Normalisation(str, enum.Enum):
     """Normalisation types."""
 
-    _01 = "01"  # Normalise to range [0, 1]
-    _11 = "-11"  # Normalise to range [-1, 1]
+    ZERO_ONE = "01"  # Normalise to range [0, 1]
+    NEG_ONE_ONE = "-11"  # Normalise to range [-1, 1]
