@@ -4,12 +4,91 @@ import sys
 from pathlib import Path
 
 import numpy as np
+import numpy.typing as npt
 import tensorflow as tf
 from generative.common.constants import Normalisation
 from generative.common.logger import get_logger
 from omegaconf import DictConfig
 
 logger = get_logger(__file__)
+
+
+def add_channel_dim(dataset: npt.NDArray[np.uint8]) -> npt.NDArray[np.uint8]:
+    """Add a channel dimension if needed.
+
+    Args:
+    ----
+        dataset: numpy array of images
+
+    Returns:
+    -------
+        dataset: uint8 NDArray
+
+    """
+    if dataset.ndim == 3:
+        dataset = dataset[:, :, :, np.newaxis]
+
+    if dataset.ndim != 4:
+        logger.error("Incorrect dataset dims: %s", dataset.shape)
+        sys.exit(1)
+
+    return dataset
+
+
+def normalise(
+    normalisation: str,
+    dataset: npt.NDArray[np.uint8],
+) -> npt.NDArray[np.float64]:
+    """Normalise images to either [0, 1] or [-1, 1].
+
+    Args:
+    ----
+        normalisation: either `01` or `-11`
+        dataset: numpy array of images
+
+    Returns:
+    -------
+        dataset: uint8 NDArray
+
+    """
+    # Normalise to [0, 1]
+    min_val, max_val = dataset.min(), dataset.max()
+    dataset = (dataset - min_val) / (max_val - min_val)
+
+    # Normalise to [-1, 1] if needed
+    if normalisation == Normalisation.NEG_ONE_ONE:
+        dataset = (dataset * 2) - 1
+
+    return dataset
+
+
+def resize_dataset(img_dims: list[int], dataset: tf.Tensor) -> tf.Tensor:
+    """Resize dataset to [H, W].
+
+    Notes:
+    -----
+        - If img_dims field is None, use default dataset size
+
+    Args:
+    ----
+        img_dims: list of img_dims e.g. [H, W]
+        dataset: numpy array of images
+
+    Returns:
+    -------
+        dataset: uint8 NDArray
+
+    """
+    # Get image dims from either config or dataset
+    if img_dims is not None:
+        if len(img_dims) != 2:
+            logger.error("Incorrect image dims %s", img_dims)
+            sys.exit(1)
+
+        # Resize images if needed
+        dataset = tf.image.resize(dataset, img_dims)
+
+    return tf.cast(dataset, tf.float16)
 
 
 def get_dataset_from_file(cfg: DictConfig, split: str) -> tf.data.Dataset:
@@ -40,42 +119,17 @@ def get_dataset_from_file(cfg: DictConfig, split: str) -> tf.data.Dataset:
         sys.exit(1)
 
     # Add channel dimension if needed
-    if dataset_np.ndim == 3:
-        dataset_np = dataset_np[:, :, :, np.newaxis]
+    dataset_np = add_channel_dim(dataset_np)
 
-    if dataset_np.ndim != 4:
-        logger.error("Incorrect dataset dims: %s", dataset_np.shape)
-        sys.exit(1)
+    # Normalise and convert to tensor
+    dataset_np = normalise(dataset_np, cfg.normalisation)
+    dataset_tf = tf.convert_to_tensor(dataset_np)
 
-    # Normalise to [0, 1]
-    min_val, max_val = dataset_np.min(), dataset_np.max()
-    dataset_np = (dataset_np - min_val) / (max_val - min_val)
+    # Resize dataset if needed
+    dataset_tf = resize_dataset(cfg.img_dims, dataset_tf)
+    dataset_size, height, width = dataset_tf.shape[0:4]
+    cfg.img_dims = [height, width]
 
-    # Normalise to [-1, 1] if needed
-    if cfg.normalisation == Normalisation.NEG_ONE_ONE:
-        dataset_np = (dataset_np * 2) - 1
-
-    dataset_tf = tf.convert_to_tensor(dataset_np.astype(np.float16))
-
-    # Get image dims from either config or dataset
-    if cfg.img_dims is not None:
-        if len(cfg.img_dims) != 2:
-            logger.error("Incorrect image dims %s", cfg.img_dims)
-            sys.exit(1)
-
-        new_dims = tuple(cfg.img_dims)
-
-    else:
-        new_dims = dataset_np.shape[1:3]
-        cfg.img_dims = new_dims
-
-    # Resize image if needed
-    old_dims = dataset_np.shape[1:3]
-
-    if old_dims != new_dims:
-        dataset_tf = tf.image.resize(dataset_tf, new_dims)
-
-    dataset_size = dataset_tf.shape[0]
     dataset = tf.data.Dataset.from_tensor_slices(dataset_tf)
 
     return dataset.shuffle(dataset_size).batch(32)
