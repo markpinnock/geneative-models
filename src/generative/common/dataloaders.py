@@ -22,7 +22,7 @@ def add_channel_dim(dataset: npt.NDArray[np.uint8]) -> npt.NDArray[np.uint8]:
 
     Returns:
     -------
-        dataset: uint8 NDArray
+        dataset: uint8 NDArray (size [N, H, W, C])
 
     """
     if dataset.ndim == 3:
@@ -63,7 +63,7 @@ def normalise(
 
 
 def resize_dataset(img_dims: list[int], dataset: tf.Tensor) -> tf.Tensor:
-    """Resize dataset to [H, W].
+    """Resize [N, H_old, W_old, C] dataset to [N, H_new, W_new, C].
 
     Notes:
     -----
@@ -71,7 +71,7 @@ def resize_dataset(img_dims: list[int], dataset: tf.Tensor) -> tf.Tensor:
 
     Args:
     ----
-        img_dims: list of img_dims e.g. [H, W]
+        img_dims: list of img_dims e.g. [H_new, W_new]
         dataset: numpy array of images
 
     Returns:
