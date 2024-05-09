@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from generative.common.constants import Normalisation
-from generative.common.dataloaders import add_channel_dim, normalise
+from generative.common.dataloaders import add_channel_dim, normalise, resize_dataset
 
 
 @pytest.mark.parametrize(
@@ -20,6 +20,14 @@ def test_add_channel_dim(data_dims: list[int], expected_dims: list[int]) -> None
     assert list(dataset.shape) == expected_dims
 
 
+@pytest.mark.parametrize("data_dims", [[4, 4], [1, 4, 4, 2, 1]])
+def test_add_channel_dim_fail(data_dims: list[int]) -> None:
+    dataset = np.zeros(data_dims)
+
+    with pytest.raises(ValueError):
+        _ = add_channel_dim(dataset)
+
+
 @pytest.mark.parametrize(
     "normalisation,expected_min_max",
     [
@@ -34,3 +42,7 @@ def test_normalise(normalisation: str, expected_min_max: list[float]) -> None:
 
     assert dataset.min() == expected_min_max[0]
     assert dataset.max() == expected_min_max[1]
+
+
+def test_resize_dataset() -> None:
+    """Test resizing dataset."""
