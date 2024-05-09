@@ -23,6 +23,7 @@ def test_add_channel_dim(data_dims: list[int], expected_dims: list[int]) -> None
 
 @pytest.mark.parametrize("data_dims", [[4, 4], [1, 4, 4, 2, 1]])
 def test_add_channel_dim_fail(data_dims: list[int]) -> None:
+    """Test channel dimension failure cases."""
     dataset = np.zeros(data_dims)
 
     with pytest.raises(ValueError):
@@ -60,3 +61,12 @@ def test_resize_dataset(data_dims: list[int], expected_dims: list[int]) -> None:
     dataset = resize_dataset(expected_dims[1:3], dataset)
 
     assert list(dataset.shape) == expected_dims
+
+
+@pytest.mark.parametrize("expected_dims", [[4], [4, 4, 1], [2, 4, 4, 3]])
+def test_resize_dataset_fail(expected_dims: list[int]) -> None:
+    """Test resizing dataset failure cases."""
+    dataset = tf.zeros([2, 4, 4, 3])
+
+    with pytest.raises(ValueError):
+        _ = resize_dataset(expected_dims, dataset)
