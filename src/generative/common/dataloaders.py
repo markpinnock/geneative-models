@@ -29,8 +29,8 @@ def add_channel_dim(dataset: npt.NDArray[np.uint8]) -> npt.NDArray[np.uint8]:
         dataset = dataset[:, :, :, np.newaxis]
 
     if dataset.ndim != 4:
-        logger.error("Incorrect dataset dims: %s", dataset.shape)
-        sys.exit(1)
+        msg = f"Incorrect dataset dims: {dataset.shape}"
+        raise ValueError(msg)
 
     return dataset
 
@@ -82,8 +82,8 @@ def resize_dataset(img_dims: list[int], dataset: tf.Tensor) -> tf.Tensor:
     # Get image dims from either config or dataset
     if img_dims is not None:
         if len(img_dims) != 2:
-            logger.error("Incorrect image dims %s", img_dims)
-            sys.exit(1)
+            msg = f"Incorrect image dims {img_dims}"
+            raise ValueError(msg)
 
         # Resize images if needed
         dataset = tf.image.resize(dataset, img_dims)
