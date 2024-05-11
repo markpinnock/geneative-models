@@ -49,18 +49,19 @@ def normalise(
 
     Returns:
     -------
-        dataset: uint8 NDArray
+        dataset: float64 NDArray
 
     """
     # Normalise to [0, 1]
     min_val, max_val = dataset.min(), dataset.max()
-    dataset = (dataset - min_val) / (max_val - min_val + EPSILON)
+    dataset_float = dataset.astype(np.float64)
+    dataset_float = (dataset_float - min_val) / (max_val - min_val + EPSILON)
 
     # Normalise to [-1, 1] if needed
     if normalisation == Normalisation.NEG_ONE_ONE:
-        dataset = (dataset * 2) - 1
+        dataset_float = (dataset_float * 2) - 1
 
-    return dataset
+    return dataset_float
 
 
 def resize_dataset(img_dims: list[int], dataset: tf.Tensor) -> tf.Tensor:
