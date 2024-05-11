@@ -106,13 +106,13 @@ def get_dataset_from_file(cfg: DictConfig, split: str) -> tf.data.Dataset:
     """
     # Get data directory
     if cfg.data_dir is None:
-        data_path = Path(__file__).parents[3] / "datasets"
+        data_path = Path(__file__).parents[3] / "datasets" / cfg.dataset_name
     else:
         data_path = Path(cfg.data_dir)
 
     # Load dataset from .npz
     try:
-        data_path = data_path / cfg.dataset_name / f"{cfg.dataset_name}.npz"
+        data_path = data_path / f"{cfg.dataset_name}.npz"
         dataset_np = np.load(data_path)[f"x_{split}"]
     except FileNotFoundError:
         logger.exception("File not found at %s", data_path)
