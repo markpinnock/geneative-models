@@ -5,7 +5,9 @@ from pathlib import Path
 
 import keras
 import numpy as np
-from generative.utils.logger import get_logger
+
+from generative.common.constants import Datasets
+from generative.common.logger import get_logger
 
 logger = get_logger(__name__)
 
@@ -18,12 +20,12 @@ def get_cifar10(save_dir: Path) -> None:
         save_dir: dataset save directory
 
     """
-    save_dir /= "cifar10"
+    save_dir /= Datasets.CIFAR10.value
     save_dir.mkdir(exist_ok=True, parents=True)
 
     (x_train, y_train), (x_test, y_test) = keras.datasets.cifar10.load_data()
     np.savez(
-        save_dir / "cifar10.npz",
+        save_dir / f"{Datasets.CIFAR10}.npz",
         x_train=x_train,
         y_train=y_train,
         x_test=x_test,
@@ -43,10 +45,10 @@ def get_mnist(save_dir: Path) -> None:
         save_dir: dataset save directory
 
     """
-    save_dir /= "mnist"
+    save_dir /= Datasets.MNIST.value
     save_dir.mkdir(exist_ok=True, parents=True)
 
-    _ = keras.datasets.mnist.load_data(path=save_dir / "mnist.npz")
+    _ = keras.datasets.mnist.load_data(path=save_dir / f"{Datasets.MNIST}.npz")
     logger.info("MNIST dataset saved to: %s", save_dir.resolve())
 
 
@@ -72,9 +74,9 @@ def main() -> None:
 
     # Download dataset
     match args.dataset:
-        case "cifar10":
+        case Datasets.CIFAR10:
             get_cifar10(save_dir)
-        case "mnist":
+        case Datasets.MNIST:
             get_mnist(save_dir)
 
 

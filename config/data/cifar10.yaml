@@ -1,0 +1,5 @@
+defaults:
+  - shared
+
+dataset_name: cifar10
+dataloader: from_file

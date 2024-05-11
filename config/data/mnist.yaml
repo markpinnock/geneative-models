@@ -1,0 +1,5 @@
+defaults:
+  - shared
+
+dataloader: from_file
+dataset_name: mnist

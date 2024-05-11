@@ -1,0 +1,10 @@
+defaults:
+  - data: mnist  # Training dataset
+  - model: gans/dcgan  # Model to be trained
+  - _self_
+
+batch_size: 32  # Batch size for training
+img_dims: null  # Image dimensions
+
+model:
+  normalisation: "01"
