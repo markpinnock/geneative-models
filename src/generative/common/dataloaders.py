@@ -132,4 +132,4 @@ def get_dataset_from_file(cfg: DictConfig, split: str) -> tf.data.Dataset:
 
     dataset = tf.data.Dataset.from_tensor_slices(dataset_tf)
 
-    return dataset.shuffle(dataset_size).batch(32)
+    return dataset.shuffle(dataset_size).batch(cfg.batch_size)
