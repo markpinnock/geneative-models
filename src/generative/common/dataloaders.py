@@ -122,12 +122,12 @@ def get_dataset_from_file(cfg: DictConfig, split: str) -> tf.data.Dataset:
     dataset_np = add_channel_dim(dataset_np)
 
     # Normalise and convert to tensor
-    dataset_np = normalise(dataset_np, cfg.normalisation)
+    dataset_np = normalise(cfg.normalisation, dataset_np)
     dataset_tf = tf.convert_to_tensor(dataset_np)
 
     # Resize dataset if needed
     dataset_tf = resize_dataset(cfg.img_dims, dataset_tf)
-    dataset_size, height, width = dataset_tf.shape[0:4]
+    dataset_size, height, width = dataset_tf.shape[0:3]
     cfg.img_dims = [height, width]
 
     dataset = tf.data.Dataset.from_tensor_slices(dataset_tf)
