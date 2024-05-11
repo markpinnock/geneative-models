@@ -2,6 +2,8 @@
 
 import enum
 
+EPSILON = 1e-12
+
 
 @enum.unique
 class Datasets(str, enum.Enum):

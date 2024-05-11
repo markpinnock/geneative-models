@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 import numpy.typing as npt
 import tensorflow as tf
-from generative.common.constants import Normalisation
+from generative.common.constants import EPSILON, Normalisation
 from generative.common.logger import get_logger
 from omegaconf import DictConfig
 
@@ -53,7 +53,7 @@ def normalise(
     """
     # Normalise to [0, 1]
     min_val, max_val = dataset.min(), dataset.max()
-    dataset = (dataset - min_val) / (max_val - min_val)
+    dataset = (dataset - min_val) / (max_val - min_val + EPSILON)
 
     # Normalise to [-1, 1] if needed
     if normalisation == Normalisation.NEG_ONE_ONE:
