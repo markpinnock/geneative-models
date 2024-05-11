@@ -1,8 +1,10 @@
 import numpy as np
 from omegaconf import DictConfig
+from pathlib import Path
 import pytest
-from typing import Callable
+
 import tensorflow as tf
+
 from generative.common.constants import Normalisation, DataSplits
 from generative.common.dataloaders import add_channel_dim, normalise, resize_dataset, get_dataset_from_file
 
@@ -83,7 +85,7 @@ def test_resize_dataset_fail(expected_dims: list[int]) -> None:
         ([8, 8], Normalisation.NEG_ONE_ONE, 4),
     ],
 )
-def test_get_dataset_from_file(create_test_dataset: Callable, img_dims: list[int], normalisation: str, batch_size: int) -> None:
+def test_get_dataset_from_file(create_test_dataset: Path, img_dims: list[int], normalisation: str, batch_size: int) -> None:
     """Test loading dataset from file."""
     cfg = DictConfig({"img_dims": img_dims, "normalisation": normalisation, "data_dir": create_test_dataset.parent, "dataset_name": "dataset", "batch_size": batch_size})
     dataset = get_dataset_from_file(cfg, DataSplits.TRAIN)
