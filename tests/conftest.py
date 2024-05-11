@@ -1,9 +1,10 @@
 """Configuration for pytest."""
 
-import numpy as np
 from pathlib import Path
-from typing import Any
 import pytest
+from typing import Any
+
+import numpy as np
 
 TEST_IMG_DIMS_3D = [8, 4, 4]
 TEST_IMG_DIMS_4D = [8, 4, 4, 3]

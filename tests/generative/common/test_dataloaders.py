@@ -1,10 +1,10 @@
 """Test functions for dataloaders."""
 
-import numpy as np
-from omegaconf import DictConfig
 from pathlib import Path
 import pytest
 
+import numpy as np
+from omegaconf import DictConfig
 import tensorflow as tf
 
 from generative.common.constants import Normalisation, DataSplits
