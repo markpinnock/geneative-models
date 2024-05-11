@@ -1,8 +1,10 @@
 import numpy as np
+from omegaconf import DictConfig
 import pytest
+from typing import Callable
 import tensorflow as tf
-from generative.common.constants import Normalisation
-from generative.common.dataloaders import add_channel_dim, normalise, resize_dataset
+from generative.common.constants import Normalisation, DataSplits
+from generative.common.dataloaders import add_channel_dim, normalise, resize_dataset, get_dataset_from_file
 
 
 @pytest.mark.parametrize(
@@ -70,3 +72,29 @@ def test_resize_dataset_fail(expected_dims: list[int]) -> None:
 
     with pytest.raises(ValueError):
         _ = resize_dataset(expected_dims, dataset)
+
+
+@pytest.mark.parametrize(
+    "img_dims,normalisation,batch_size",
+    [
+        ([4, 4], Normalisation.ZERO_ONE, 2),
+        ([4, 4], Normalisation.NEG_ONE_ONE, 4),
+        ([8, 8], Normalisation.ZERO_ONE, 2),
+        ([8, 8], Normalisation.NEG_ONE_ONE, 4),
+    ],
+)
+def test_get_dataset_from_file(create_test_dataset: Callable, img_dims: list[int], normalisation: str, batch_size: int) -> None:
+    """Test loading dataset from file."""
+    cfg = DictConfig({"img_dims": img_dims, "normalisation": normalisation, "data_dir": create_test_dataset.parent, "dataset_name": "dataset", "batch_size": batch_size})
+    dataset = get_dataset_from_file(cfg, DataSplits.TRAIN)
+    img_batch = next(iter(dataset))
+
+    assert img_batch.ndim == 4
+    assert img_batch.shape[0] == batch_size
+    assert list(img_batch.shape)[1:3] == img_dims
+
+    if normalisation == Normalisation.NEG_ONE_ONE:
+        assert tf.reduce_min(img_batch) == -1.0
+    else:
+        assert tf.reduce_min(img_batch) == 0.0
+    assert tf.reduce_max(img_batch) == 1.0
