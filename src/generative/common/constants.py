@@ -12,6 +12,10 @@ class Datasets(str, enum.Enum):
     CIFAR10 = "cifar10"
     MNIST = "mnist"
 
+    def __str__(self) -> str:
+        """Get string representation."""
+        return self.value
+
 
 @enum.unique
 class DataSplits(str, enum.Enum):
@@ -21,6 +25,10 @@ class DataSplits(str, enum.Enum):
     VALID = "validation"
     TEST = "test"
 
+    def __str__(self) -> str:
+        """Get string representation."""
+        return self.value
+
 
 @enum.unique
 class Normalisation(str, enum.Enum):
@@ -28,3 +36,7 @@ class Normalisation(str, enum.Enum):
 
     ZERO_ONE = "01"  # Normalise to range [0, 1]
     NEG_ONE_ONE = "-11"  # Normalise to range [-1, 1]
+
+    def __str__(self) -> str:
+        """Get string representation."""
+        return self.value
