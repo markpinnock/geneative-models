@@ -42,8 +42,8 @@ def test_normalise(normalisation: str, expected_min_max: list[float]) -> None:
     dataset = np.repeat(np.reshape(np.arange(0, 256), [4, 8, 8, 1]), 3, axis=3)
     dataset = normalise(normalisation, dataset)
 
-    assert dataset.min() == expected_min_max[0]
-    assert dataset.max() == expected_min_max[1]
+    assert np.isclose(dataset.min(), expected_min_max[0])
+    assert np.isclose(dataset.max(), expected_min_max[1])
 
 
 @pytest.mark.parametrize(
