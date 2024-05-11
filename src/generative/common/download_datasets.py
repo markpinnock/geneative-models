@@ -5,6 +5,7 @@ from pathlib import Path
 
 import keras
 import numpy as np
+
 from generative.common.constants import Datasets
 from generative.common.logger import get_logger
 

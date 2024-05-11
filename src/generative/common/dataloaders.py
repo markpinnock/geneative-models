@@ -6,9 +6,10 @@ from pathlib import Path
 import numpy as np
 import numpy.typing as npt
 import tensorflow as tf
+from omegaconf import DictConfig
+
 from generative.common.constants import EPSILON, Normalisation
 from generative.common.logger import get_logger
-from omegaconf import DictConfig
 
 logger = get_logger(__file__)
 

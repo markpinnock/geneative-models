@@ -29,6 +29,8 @@ exclude = [
     "venv",
 ]
 
+src = ["src"]
+
 # Same as Black.
 line-length = 88
 indent-width = 4
