@@ -13,6 +13,7 @@ class ActivationsEnum(str, enum.Enum):
     RELU = "relu"
     LEAKY_RELU = "leaky_relu"
     LINEAR = "linear"
+    SIGMOID = "sigmoid"
     TANH = "tanh"
 
     def __str__(self) -> str:
@@ -54,5 +55,6 @@ class Activation(metaclass=ActivationMeta):
         ),
         ActivationsEnum.LINEAR: tf.keras.activations.linear,
         ActivationsEnum.RELU: tf.keras.activations.relu,
+        ActivationsEnum.SIGMOID: tf.keras.activations.sigmoid,
         ActivationsEnum.TANH: tf.keras.activations.tanh,
     }
