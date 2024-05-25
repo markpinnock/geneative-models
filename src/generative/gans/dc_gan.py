@@ -240,3 +240,108 @@ class Discriminator(tf.keras.Model):
         """Print model summary."""
         x = tf.keras.layers.Input(self._img_dims)
         tf.keras.Model(inputs=[x], outputs=self.call(x), name="Discriminator").summary()
+
+
+class Generator(tf.keras.layers.Layer):
+    """Generator for DCGAN.
+
+    Args:
+        cfg: config
+        name: model name
+    """
+
+    def __init__(self, cfg: DictConfig, name: str = "generator"):
+        super().__init__(name=name)
+        initialiser = tf.keras.initializers.RandomNormal(0, 0.02)
+        self.blocks = []
+
+        # Get start and end resolutions
+        self._start_resolution = 4
+        assert cfg["img_dims"][0] == cfg["img_dims"][1], "Only square images supported"
+        self._end_resolution = cfg["img_dims"][0]
+        self._latent_dim = cfg.latent_dim  # Needed for summary method
+
+        # Get number of layers and channels
+        self._num_layers = int(np.log2(self._end_resolution)) - int(
+            np.log2(self._start_resolution),
+        )
+        self._channels = [
+            np.min(
+                [(cfg.generator_channels * 2**i), cfg.max_channels],
+            )
+            for i in range(self.num_layers - 1, -1, -1)
+        ]
+
+        # Add initial conv layer or dense block as needed
+        if cfg.generator_dense:
+            dense_units = (
+                self._start_resolution * self._start_resolution * self._channels[0]
+            )
+            self.blocks.append(
+                DCDense(
+                    units=dense_units,
+                    activation=cfg.generator_activation,
+                    kernel_initializer=initialiser,
+                    name="dense",
+                ),
+            )
+            self.blocks.append(
+                tf.keras.layers.Reshape(
+                    [self._start_resolution, self._start_resolution, self._channels[0]],
+                ),
+            )
+
+        else:
+            self.blocks.append(tf.keras.layers.Reshape([1, 1, cfg.latent_dim]))
+            self.blocks.append(
+                UpBlock(
+                    channels=self._channels[0],
+                    initialiser=initialiser,
+                    activation=cfg.generator_activation,
+                    batchnorm=True,
+                    first=True,
+                    name="up0",
+                ),
+            )
+
+        for i in range(1, self._num_layers):
+            self.blocks.append(
+                UpBlock(
+                    channels=self._channels[i],
+                    initialiser=initialiser,
+                    activation=cfg.generator_activation,
+                    batchnorm=True,
+                    first=False,
+                    name=f"up{i}",
+                ),
+            )
+
+        self.blocks.append(
+            UpBlock(
+                channels=cfg.img_dims[2],
+                initialiser=initialiser,
+                activation=cfg.generator_output,
+                batchnorm=False,
+                name="final",
+            ),
+        )
+
+    def call(self, x):
+        """Forward pass through generator."""
+        for block in self.blocks:
+            x = block(x)
+
+        return x
+
+    @property
+    def num_layers(self):
+        return self._num_layers
+
+    @property
+    def channels(self):
+        return self._channels
+
+    def summary(self):
+        """Print model summary."""
+        x = tf.keras.layers.Input([self._latent_dim])
+        tf.keras.Model(inputs=[x], outputs=self.call(x), name="Generator").summary()
