@@ -1,4 +1,4 @@
 data_dir: null
 batch_size: ${batch_size}
 img_dims: ${img_dims}
-normalisation: ${model.normalisation}
+normalisation: "01"  # Data normalisation type

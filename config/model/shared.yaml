@@ -1,4 +1,4 @@
 # Less frequently used parameters shared by all models
+img_dims: ${data.img_dims}  # Image dimensions
 max_channels: 512  # Maximum number of channels
-normalisation: "01"  # Data normalisation type
 num_examples: 16  # Number of examples to generate
