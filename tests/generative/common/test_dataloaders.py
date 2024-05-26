@@ -87,9 +87,22 @@ def test_resize_dataset_fail(expected_dims: list[int]) -> None:
         ([8, 8], Normalisation.NEG_ONE_ONE, 4),
     ],
 )
-def test_get_dataset_from_file(create_test_dataset: Path, img_dims: list[int], normalisation: str, batch_size: int) -> None:
+def test_get_dataset_from_file(
+    create_test_dataset: Path,
+    img_dims: list[int],
+    normalisation: str,
+    batch_size: int,
+) -> None:
     """Test loading dataset from file."""
-    cfg = DictConfig({"img_dims": img_dims, "normalisation": normalisation, "data_dir": create_test_dataset.parent, "dataset_name": "dataset", "batch_size": batch_size})
+    cfg = DictConfig(
+        {
+            "img_dims": img_dims,
+            "normalisation": normalisation,
+            "data_dir": create_test_dataset.parent,
+            "dataset_name": "dataset",
+            "batch_size": batch_size,
+        },
+    )
     dataset = get_dataset_from_file(cfg, DataSplits.TRAIN)
     img_batch = next(iter(dataset))
 
