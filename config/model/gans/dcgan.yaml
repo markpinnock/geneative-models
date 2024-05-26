@@ -1,0 +1,11 @@
+defaults:
+  - shared
+
+model_name: dcgan
+
+discriminator_activation: leaky_relu
+discriminator_dense: false
+
+generator_activation: relu
+generator_dense: false
+generator_output: sigmoid
