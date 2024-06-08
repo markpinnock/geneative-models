@@ -7,25 +7,25 @@ model_name: dcgan
 # Discriminator parameters
 discriminator:
   activation: leaky_relu  # Activation function
-  channels: 8  # Number of channels in first layer
+  channels: 64  # Number of channels in first layer
   dense: false  # Use dense layer before output
   opt: adam  # Optimiser [adam]
   opt_h_params:  # Optimiser hyperparameters
-    lr: 0.0002  # Learning rate
-    beta_1: 0.5  # Beta 1
-    beta_2: 0.999  # Beta 2
+    learning_rate: 0.0002
+    beta_1: 0.5
+    beta_2: 0.999
 
 # Generator parameters
 generator:
   activation: relu  # Activation function
-  channels: 8  # Number of channels in first layer
+  channels: 64  # Number of channels in first layer
   dense: false  # Use dense layer after latent noise
-  output: sigmoid  # Output activation function
+  output: tanh  # Output activation function
   opt: adam  # Optimiser [adam]
   opt_h_params:  # Optimiser hyperparameters
-    lr: 0.0002  # Learning rate
-    beta_1: 0.5  # Beta 1
-    beta_2: 0.999  # Beta 2
+    learning_rate: 0.0002
+    beta_1: 0.5
+    beta_2: 0.999
 
-latent_dim: 128  # Latent noise dimension
+latent_dim: 100  # Latent noise dimension
 loss: binary_crossentropy  # Loss function
