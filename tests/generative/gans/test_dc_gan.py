@@ -12,24 +12,26 @@ MAX_CHANNELS = 4
 
 
 @pytest.mark.parametrize(
-    "mb_size,scale_factor,channels,dense",
+    "mb_size,scale_factor,img_channels,dense",
     [
         (2, 3, 1, False), (2, 4, 1, False), (4, 3, 3, False), (4, 4, 3, False),
         (2, 3, 1, True), (2, 4, 1, True), (4, 3, 3, True), (4, 4, 3, True),
     ],
 )
-def test_discriminator(mb_size: int, scale_factor: int, channels: int, dense: bool) -> None:
+def test_discriminator(mb_size: int, scale_factor: int, img_channels: int, dense: bool) -> None:
     """Test discriminator initialisation."""
-    img_dims = [4 * 2 ** scale_factor, 4 * 2 ** scale_factor, channels]
+    img_dims = [4 * 2 ** scale_factor, 4 * 2 ** scale_factor, img_channels]
     channels = [np.min([2 ** i, MAX_CHANNELS]) for i in range(scale_factor)]
 
     cfg = DictConfig(
         {
             "img_dims": img_dims,
             "max_channels": 4,
-            "discriminator_activation": "leaky_relu",
-            "discriminator_channels": 1,
-            "discriminator_dense": dense,
+            "discriminator": {
+                "activation": "leaky_relu",
+                "channels": 1,
+                "dense": dense,
+            },
         },
     )
     discriminator = Discriminator(cfg)
@@ -43,28 +45,30 @@ def test_discriminator(mb_size: int, scale_factor: int, channels: int, dense: bo
 
 
 @pytest.mark.parametrize(
-    "mb_size,scale_factor,channels,latent_dim,dense",
+    "mb_size,scale_factor,img_channels,latent_dim,dense",
     [
         (2, 3, 1, 2, False), (2, 4, 1, 2, False), (4, 3, 3, 4, False), (4, 4, 3, 4, False),
         (2, 3, 1, 2, True), (2, 4, 1, 2, True), (4, 3, 3, 4, True), (4, 4, 3, 4, True),
     ],
 )
-def test_generator(mb_size: int, scale_factor: int, channels: int, latent_dim: int, dense: bool) -> None:
+def test_generator(mb_size: int, scale_factor: int, img_channels: int, latent_dim: int, dense: bool) -> None:
     """Test generator initialisation."""
 
-    img_dims = [4 * 2 ** scale_factor, 4 * 2 ** scale_factor, channels]
+    img_dims = [4 * 2 ** scale_factor, 4 * 2 ** scale_factor, img_channels]
     channels = [np.min([2 ** i, MAX_CHANNELS]) for i in range(scale_factor)]
     reversed(channels)
 
     cfg = DictConfig(
         {
-            "generator_activation": "relu",
-            "generator_channels": 1,
-            "generator_dense": dense,
-            "generator_output": "sigmoid",
             "img_dims": img_dims,
             "latent_dim": latent_dim,
             "max_channels": 4,
+            "generator": {
+                "activation": "relu",
+                "channels": 1,
+                "dense": dense,
+                "output": "sigmoid",
+            },
         },
     )
     generator = Generator(cfg)
