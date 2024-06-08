@@ -90,7 +90,7 @@ def resize_dataset(img_dims: list[int], dataset: tf.Tensor) -> tf.Tensor:
         # Resize images if needed
         dataset = tf.image.resize(dataset, img_dims)
 
-    return tf.cast(dataset, tf.float16)
+    return tf.cast(dataset, tf.float32)
 
 
 def get_dataset_from_file(cfg: DictConfig, split: str) -> tf.data.Dataset:
@@ -131,6 +131,7 @@ def get_dataset_from_file(cfg: DictConfig, split: str) -> tf.data.Dataset:
     dataset_tf = resize_dataset(cfg.img_dims, dataset_tf)
     dataset_size, height, width, channels = dataset_tf.shape
     cfg.img_dims = [height, width, channels]
+    logger.info("Dataset size: %s", dataset_tf.shape)
 
     dataset = tf.data.Dataset.from_tensor_slices(dataset_tf)
 
