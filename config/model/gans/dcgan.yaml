@@ -1,11 +1,31 @@
+# DC GAN default configuration
 defaults:
   - shared
 
 model_name: dcgan
 
-discriminator_activation: leaky_relu
-discriminator_dense: false
+# Discriminator parameters
+discriminator:
+  activation: leaky_relu  # Activation function
+  channels: 8  # Number of channels in first layer
+  dense: false  # Use dense layer before output
+  opt: adam  # Optimiser [adam]
+  opt_h_params:  # Optimiser hyperparameters
+    lr: 0.0002  # Learning rate
+    beta_1: 0.5  # Beta 1
+    beta_2: 0.999  # Beta 2
 
-generator_activation: relu
-generator_dense: false
-generator_output: sigmoid
+# Generator parameters
+generator:
+  activation: relu  # Activation function
+  channels: 8  # Number of channels in first layer
+  dense: false  # Use dense layer after latent noise
+  output: sigmoid  # Output activation function
+  opt: adam  # Optimiser [adam]
+  opt_h_params:  # Optimiser hyperparameters
+    lr: 0.0002  # Learning rate
+    beta_1: 0.5  # Beta 1
+    beta_2: 0.999  # Beta 2
+
+latent_dim: 128  # Latent noise dimension
+loss: binary_crossentropy  # Loss function

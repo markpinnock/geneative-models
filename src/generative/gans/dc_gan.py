@@ -170,10 +170,10 @@ class Discriminator(tf.keras.Model):
         self.blocks = []
 
         # Get start and end resolutions
-        assert cfg["img_dims"][0] == cfg["img_dims"][1], "Only square images supported"
-        self._start_resolution = cfg["img_dims"][0]
+        assert cfg.img_dims[0] == cfg.img_dims[1], "Only square images supported"
+        self._start_resolution = cfg.img_dims[0]
         self._end_resolution = 4
-        self._img_dims = cfg["img_dims"]  # Needed for summary method
+        self._img_dims = cfg.img_dims  # Needed for summary method
 
         # Get number of layers and channels
         self._num_layers = int(np.log2(self._start_resolution)) - int(
@@ -181,7 +181,7 @@ class Discriminator(tf.keras.Model):
         )
         self._channels = [
             np.min(
-                [(cfg.discriminator_channels * 2**i), cfg.max_channels],
+                [(cfg.discriminator.channels * 2**i), cfg.max_channels],
             )
             for i in range(self._num_layers)
         ]
@@ -192,7 +192,7 @@ class Discriminator(tf.keras.Model):
                 DownBlock(
                     channels=self._channels[i],
                     initialiser=initialiser,
-                    activation=cfg.discriminator_activation,
+                    activation=cfg.discriminator.activation,
                     batchnorm=True,
                     final=False,
                     name=f"dn{i}",
@@ -200,12 +200,12 @@ class Discriminator(tf.keras.Model):
             )
 
         # Add final conv layer or dense block as needed
-        if cfg.discriminator_dense:
+        if cfg.discriminator.dense:
             self.blocks.append(tf.keras.layers.Flatten())
             self.blocks.append(
                 DCDense(
                     units=1,
-                    activation=cfg.discriminator_activation,
+                    activation=cfg.discriminator.activation,
                     kernel_initializer=initialiser,
                     name="dense",
                 ),
@@ -261,8 +261,8 @@ class Generator(tf.keras.layers.Layer):
 
         # Get start and end resolutions
         self._start_resolution = 4
-        assert cfg["img_dims"][0] == cfg["img_dims"][1], "Only square images supported"
-        self._end_resolution = cfg["img_dims"][0]
+        assert cfg.img_dims[0] == cfg.img_dims[1], "Only square images supported"
+        self._end_resolution = cfg.img_dims[0]
         self._latent_dim = cfg.latent_dim  # Needed for summary method
 
         # Get number of layers and channels
@@ -271,20 +271,20 @@ class Generator(tf.keras.layers.Layer):
         )
         self._channels = [
             np.min(
-                [(cfg.generator_channels * 2**i), cfg.max_channels],
+                [(cfg.generator.channels * 2**i), cfg.max_channels],
             )
             for i in range(self._num_layers - 1, -1, -1)
         ]
 
         # Add initial conv layer or dense block as needed
-        if cfg.generator_dense:
+        if cfg.generator.dense:
             dense_units = (
                 self._start_resolution * self._start_resolution * self._channels[0]
             )
             self.blocks.append(
                 DCDense(
                     units=dense_units,
-                    activation=cfg.generator_activation,
+                    activation=cfg.generator.activation,
                     kernel_initializer=initialiser,
                     name="dense",
                 ),
@@ -301,7 +301,7 @@ class Generator(tf.keras.layers.Layer):
                 UpBlock(
                     channels=self._channels[0],
                     initialiser=initialiser,
-                    activation=cfg.generator_activation,
+                    activation=cfg.generator.activation,
                     batchnorm=True,
                     first=True,
                     name="up0",
@@ -313,7 +313,7 @@ class Generator(tf.keras.layers.Layer):
                 UpBlock(
                     channels=self._channels[i],
                     initialiser=initialiser,
-                    activation=cfg.generator_activation,
+                    activation=cfg.generator.activation,
                     batchnorm=True,
                     first=False,
                     name=f"up{i}",
@@ -324,7 +324,7 @@ class Generator(tf.keras.layers.Layer):
             UpBlock(
                 channels=cfg.img_dims[2],
                 initialiser=initialiser,
-                activation=cfg.generator_output,
+                activation=cfg.generator.output,
                 batchnorm=False,
                 name="final",
             ),
