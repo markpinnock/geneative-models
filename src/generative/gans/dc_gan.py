@@ -5,7 +5,7 @@ from omegaconf import DictConfig
 from generative.common.activations import Activation
 
 
-class DCDense(tf.keras.layers.Dense):
+class DCDense(tf.keras.layers.Layer):
     """Dense layer for DCGAN with activation function.
 
     Args:
@@ -16,14 +16,15 @@ class DCDense(tf.keras.layers.Dense):
     """
 
     def __init__(self, activation: str, **kwargs) -> None:
-        super().__init__(**kwargs)
+        super().__init__(name=kwargs["name"])
+        self.dense = tf.keras.layers.Dense(**kwargs)
         if activation not in Activation:
             raise ValueError(f"Activation {activation} not supported")
         self.activation = Activation[activation]
 
     def call(self, x: tf.Tensor) -> tf.Tensor:
         """Forward pass through dense layer."""
-        x = super(x)
+        x = self.dense(x)
         return self.activation(x)
 
 
@@ -182,11 +183,11 @@ class Discriminator(tf.keras.Model):
             np.min(
                 [(cfg.discriminator_channels * 2**i), cfg.max_channels],
             )
-            for i in range(self.num_layers)
+            for i in range(self._num_layers)
         ]
 
         # Create layers
-        for i in range(self.num_layers):
+        for i in range(self._num_layers):
             self.blocks.append(
                 DownBlock(
                     channels=self._channels[i],
@@ -226,10 +227,13 @@ class Discriminator(tf.keras.Model):
         for block in self.blocks:
             x = block(x)
 
+        if x.ndim == 4:
+            x = x[:, :, 0, 0]  # Ensure output dim [N, 1]
+
         return x
 
     @property
-    def num_layers(self) -> int:
+    def num_downsample(self) -> int:
         return self._num_layers
 
     @property
@@ -269,7 +273,7 @@ class Generator(tf.keras.layers.Layer):
             np.min(
                 [(cfg.generator_channels * 2**i), cfg.max_channels],
             )
-            for i in range(self.num_layers - 1, -1, -1)
+            for i in range(self._num_layers - 1, -1, -1)
         ]
 
         # Add initial conv layer or dense block as needed
@@ -334,12 +338,12 @@ class Generator(tf.keras.layers.Layer):
         return x
 
     @property
-    def num_layers(self):
+    def num_downsample(self):
         return self._num_layers
 
     @property
     def channels(self):
-        return self._channels
+        return self._channels[::-1]
 
     def summary(self):
         """Print model summary."""
