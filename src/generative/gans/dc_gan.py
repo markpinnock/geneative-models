@@ -1,3 +1,9 @@
+"""Deep Convolutional GAN implementation.
+
+Radford et al. Unsupervised Representation Learning with Deep Convolutional Generative Adversarial Networks. ICLR 2016.
+https://arxiv.org/abs/1511.06434
+"""
+
 import numpy as np
 import tensorflow as tf
 from omegaconf import DictConfig
@@ -188,7 +194,18 @@ class Discriminator(tf.keras.Model):
         ]
 
         # Create layers
-        for i in range(self._num_layers):
+        self.blocks.append(
+            DownBlock(
+                channels=self._channels[0],
+                initialiser=initialiser,
+                activation=cfg.discriminator.activation,
+                batchnorm=False,
+                final=False,
+                name=f"dn0",
+            ),
+        )
+
+        for i in range(1, self._num_layers):
             self.blocks.append(
                 DownBlock(
                     channels=self._channels[i],
@@ -327,6 +344,7 @@ class Generator(tf.keras.layers.Layer):
                 initialiser=initialiser,
                 activation=cfg.generator.output,
                 batchnorm=False,
+                first=False,
                 name="final",
             ),
         )
