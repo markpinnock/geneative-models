@@ -3,6 +3,7 @@ import tensorflow as tf
 from omegaconf import DictConfig
 
 from generative.common.activations import Activation
+from generative.gans.base_gan import BaseGAN
 
 
 class DCDense(tf.keras.layers.Layer):
@@ -349,3 +350,52 @@ class Generator(tf.keras.layers.Layer):
         """Print model summary."""
         x = tf.keras.layers.Input([self._latent_dim])
         tf.keras.Model(inputs=[x], outputs=self.call(x), name="Generator").summary()
+
+
+class DCGAN(BaseGAN):
+    """Implementation of Deep Convolutional GAN.
+
+    Args:
+        cfg: configuration object
+    """
+
+    def __init__(self, cfg: DictConfig) -> None:
+        super().__init__(cfg)
+        self.generator = Generator(cfg)
+        self.discriminator = Discriminator(cfg)
+
+    @tf.function
+    def train_step(self, real_images: tf.Tensor) -> dict[str, tf.Tensor]:
+        """Perform one train step for DCGAN.
+
+        Args:
+            real_images: batch of real images
+
+        Returns:
+            dictionary of losses
+        """
+        self.discriminator_step(real_images)
+        self.generator_step()
+
+        return {"d_loss": self._d_metric.result(), "g_loss": self._g_metric.result()}
+
+    def call(self, num_examples: int = 0) -> tf.Tensor:
+        """Generate fake images from random noise.
+
+        Args:
+            num_examples: number of examples to generate (uses fixed noise if None)
+
+        Returns:
+            generated fake images
+        """
+        if num_examples == 0:
+            imgs = self.generator(self.fixed_noise)
+
+        else:
+            latent_noise = tf.random.normal(
+                (num_examples, self._latent_dim),
+                dtype="float32",
+            )
+            imgs = self.generator(latent_noise)
+
+        return imgs
