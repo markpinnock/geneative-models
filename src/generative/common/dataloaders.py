@@ -8,10 +8,13 @@ import numpy.typing as npt
 import tensorflow as tf
 from omegaconf import DictConfig
 
+from generative.common.activations import ActivationsEnum
 from generative.common.constants import EPSILON, Normalisation
 from generative.common.logger import get_logger
 
 logger = get_logger(__file__)
+
+FROM_FILE = "from_file"
 
 
 def add_channel_dim(dataset: npt.NDArray[np.uint8]) -> npt.NDArray[np.uint8]:
@@ -136,3 +139,33 @@ def get_dataset_from_file(cfg: DictConfig, split: str) -> tf.data.Dataset:
     dataset = tf.data.Dataset.from_tensor_slices(dataset_tf)
 
     return dataset.shuffle(dataset_size).batch(cfg.batch_size)
+
+
+def get_dataset(cfg: DictConfig, split: str) -> tf.data.Dataset:
+    """Get dataset.
+
+    Args:
+    ----
+        cfg: config
+        split: one of `train`, `valid` or `test`
+
+    Returns:
+    -------
+        dataset: tf.data.Dataset
+
+    """
+    if (
+        cfg.data.normalisation == Normalisation.ZERO_ONE
+        and cfg.model.generator.output == ActivationsEnum.TANH
+    ):
+        logger.warning("Generator output is tanh but data range is [0, 1]")
+    elif (
+        cfg.data.normalisation == Normalisation.NEG_ONE_ONE
+        and cfg.model.generator.output == ActivationsEnum.SIGMOID
+    ):
+        logger.warning("Generator output is sigmoid but data range is [-1, 1]")
+
+    if cfg.data.dataloader == FROM_FILE:
+        return get_dataset_from_file(cfg.data, split)
+    else:
+        raise ValueError(f"Dataset '{cfg.data.dataloader}' not supported.")
