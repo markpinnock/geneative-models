@@ -8,3 +8,4 @@ outputs
 .ruff_cache
 .mypy_cache
 .tox
+runs

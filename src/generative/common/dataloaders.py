@@ -1,6 +1,7 @@
 """Functions for accessing dataloaders."""
 
 import sys
+from functools import partial
 from pathlib import Path
 
 import numpy as np
@@ -15,6 +16,7 @@ from generative.common.logger import get_logger
 logger = get_logger(__file__)
 
 FROM_FILE = "from_file"
+FROM_FOLDER = "from_folder"
 
 
 def add_channel_dim(dataset: npt.NDArray[np.uint8]) -> npt.NDArray[np.uint8]:
@@ -65,6 +67,30 @@ def normalise(
         dataset_float = (dataset_float * 2) - 1
 
     return dataset_float
+
+
+def normalise_tf(normalisation: str, x: tf.Tensor) -> tf.Tensor:
+    """Normalise images to either [0, 1] or [-1, 1].
+
+    Args:
+    ----
+        normalisation: either `01` or `-11`
+        dataset: tensor of images
+
+    Returns:
+    -------
+        dataset: tf.Tensor
+
+    """
+    # Normalise to [0, 1]
+    min_val, max_val = tf.reduce_min(x), tf.reduce_max(x)
+    x = (x - min_val) / (max_val - min_val + EPSILON)
+
+    # Normalise to [-1, 1] if needed
+    if normalisation == Normalisation.NEG_ONE_ONE:
+        x = (x * 2) - 1
+
+    return x
 
 
 def resize_dataset(img_dims: list[int], dataset: tf.Tensor) -> tf.Tensor:
@@ -141,6 +167,46 @@ def get_dataset_from_file(cfg: DictConfig, split: str) -> tf.data.Dataset:
     return dataset.shuffle(dataset_size).batch(cfg.batch_size)
 
 
+def get_dataset_from_folder(cfg: DictConfig) -> tf.data.Dataset:
+    """Get dataset from a folder of images.
+
+    Args:
+    ----
+        cfg: config
+        split: one of `train`, `valid` or `test`
+
+    Returns:
+    -------
+        dataset: tf.data.Dataset
+
+    """
+    # Get data directory
+    if cfg.data_dir is None:
+        data_dir = Path(__file__).parents[3] / "datasets" / cfg.dataset_name
+    else:
+        data_dir = Path(cfg.data_dir)
+
+    normalisation_fn = partial(normalise_tf, cfg.normalisation)
+
+    # Load dataset from folder
+    dataset = tf.keras.utils.image_dataset_from_directory(
+        data_dir,
+        labels=None,
+        color_mode="rgb",
+        batch_size=cfg.batch_size,
+        image_size=tuple(cfg.img_dims),
+        shuffle=True,
+        seed=None,
+        interpolation="bilinear",
+        data_format="channels_last",
+        verbose=True,
+    )
+
+    cfg.img_dims = tf.shape(next(iter(dataset))).numpy().tolist()[1:]
+
+    return dataset.map(normalisation_fn, tf.data.AUTOTUNE).prefetch(tf.data.AUTOTUNE)
+
+
 def get_dataset(cfg: DictConfig, split: str) -> tf.data.Dataset:
     """Get dataset.
 
@@ -167,5 +233,7 @@ def get_dataset(cfg: DictConfig, split: str) -> tf.data.Dataset:
 
     if cfg.data.dataloader == FROM_FILE:
         return get_dataset_from_file(cfg.data, split)
+    elif cfg.data.dataloader == FROM_FOLDER:
+        return get_dataset_from_folder(cfg.data)
     else:
         raise ValueError(f"Dataset '{cfg.data.dataloader}' not supported.")
