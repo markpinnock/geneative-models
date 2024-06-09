@@ -3,8 +3,8 @@ defaults:
   - model: gans/dcgan  # Model to be trained
   - _self_
 
-run_folder: ???
-run_name: ???
+run_folder: /home/m.pinnock/programming/generative-models/runs
+run_name: dcgan_cifar10
 
 batch_size: 128  # Batch size for training
 epochs: 100  # Number of epochs
