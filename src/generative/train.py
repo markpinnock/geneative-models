@@ -28,7 +28,7 @@ def get_model(cfg: DictConfig) -> tf.keras.Model:
     return model
 
 
-@hydra.main(config_path="../../config", config_name="config")
+@hydra.main(config_path="config/", config_name="config", version_base=None)
 def train(cfg: DictConfig) -> None:
     """Entry point for training models."""
     train_dataset = get_dataset(cfg, DataSplits.TRAIN)
