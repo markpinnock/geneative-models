@@ -3,8 +3,12 @@ defaults:
   - model: gans/dcgan  # Model to be trained
   - _self_
 
+run_folder: ???
+run_name: ???
+
 batch_size: 128  # Batch size for training
 epochs: 100  # Number of epochs
+save_freq: 10  # Save every N epochs
 
 data:
   img_dims: null  # Image dimensions
