@@ -9,6 +9,7 @@ import tensorflow as tf
 from omegaconf import DictConfig
 
 from generative.common.activations import Activation
+from generative.common.registry import Categories, Registry
 from generative.gans.base_gan import BaseGAN
 
 
@@ -370,6 +371,7 @@ class Generator(tf.keras.layers.Layer):
         tf.keras.Model(inputs=[x], outputs=self.call(x), name="Generator").summary()
 
 
+@Registry.register(Categories.MODELS, "dcgan")
 class DCGAN(BaseGAN):
     """Implementation of Deep Convolutional GAN.
 
