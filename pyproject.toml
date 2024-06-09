@@ -33,3 +33,4 @@ test = [
 
 [project.scripts]
 download_datasets = "generative.common.download_datasets:main"
+train = "generative.train:train"
