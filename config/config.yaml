@@ -3,8 +3,11 @@ defaults:
   - model: gans/dcgan  # Model to be trained
   - _self_
 
-batch_size: 32  # Batch size for training
-img_dims: null  # Image dimensions
+batch_size: 128  # Batch size for training
+epochs: 100  # Number of epochs
+
+data:
+  img_dims: null  # Image dimensions
 
 model:
-  normalisation: "01"
+  latent_dim: 100  # Latent dimension
