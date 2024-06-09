@@ -1,10 +1,10 @@
 defaults:
-  - data: mnist  # Training dataset
+  - data: celeba_hq_256  # Training dataset
   - model: gans/dcgan  # Model to be trained
   - _self_
 
-run_folder: /home/m.pinnock/programming/generative-models/runs
-run_name: dcgan_cifar10
+run_folder: ???  # Experiment folder
+run_name: ???  # Experiment name
 
 batch_size: 128  # Batch size for training
 epochs: 100  # Number of epochs
