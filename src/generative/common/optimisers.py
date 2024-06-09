@@ -20,6 +20,8 @@ class OptimisersEnum(str, enum.Enum):
 class OptimiserMeta(type):
     """Metaclass for optimiser factory."""
 
+    _optimisers: dict[str, type[tf.keras.optimizers.Optimizer]]
+
     def __contains__(cls, x: str) -> bool:
         """Check if optimiser in dictionary.
 
@@ -28,7 +30,7 @@ class OptimiserMeta(type):
         """
         return x in cls._optimisers
 
-    def __getitem__(cls, x: str) -> Callable:
+    def __getitem__(cls, x: str) -> type[tf.keras.optimizers.Optimizer]:
         """Return optimiser from dictionary.
 
         Args:

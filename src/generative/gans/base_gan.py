@@ -90,18 +90,18 @@ class BaseGAN(tf.keras.Model, abc.ABC):
         self._d_metric.update_state(loss)
 
     @abc.abstractmethod
-    def train_step(self, data):
+    def train_step(self, data: tf.Tensor) -> tf.Tensor:
         raise NotImplementedError
 
-    def summary(self):
+    def summary(self) -> None:
         """Print model summary."""
         self.generator.summary()
         self.discriminator.summary()
 
     @abc.abstractmethod
-    def call(self):
+    def call(self, x: tf.Tensor) -> tf.Tensor:
         raise NotImplementedError
 
     @property
-    def metrics(self):
+    def metrics(self) -> list[tf.Tensor]:
         return [self._d_metric, self._g_metric]

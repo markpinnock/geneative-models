@@ -22,7 +22,7 @@ class DCDense(tf.keras.layers.Layer):
         name: layer name
     """
 
-    def __init__(self, activation: str, **kwargs) -> None:
+    def __init__(self, activation: str, **kwargs: int | str) -> None:
         super().__init__(name=kwargs["name"])
         self.dense = tf.keras.layers.Dense(**kwargs)
         if activation not in Activation:
@@ -116,10 +116,10 @@ class UpBlock(tf.keras.layers.Layer):
         channels: int,
         initialiser: tf.keras.initializers.Initializer,
         activation: str,
-        batchnorm=True,
-        first=False,
-        name=None,
-    ):
+        batchnorm: bool = True,
+        first: bool = False,
+        name: str | None = None,
+    ) -> None:
         super().__init__(name=name)
         if activation not in Activation:
             raise ValueError(f"Activation {activation} not supported")
@@ -153,7 +153,7 @@ class UpBlock(tf.keras.layers.Layer):
         else:
             self.bn = None
 
-    def call(self, x):
+    def call(self, x: tf.Tensor) -> tf.Tensor:
         """Forward pass through convolutional block."""
         x = self.conv(x)
 
@@ -349,7 +349,7 @@ class Generator(tf.keras.layers.Layer):
             ),
         )
 
-    def call(self, x):
+    def call(self, x: tf.Tensor) -> tf.Tensor:
         """Forward pass through generator."""
         for block in self.blocks:
             x = block(x)
@@ -357,14 +357,14 @@ class Generator(tf.keras.layers.Layer):
         return x
 
     @property
-    def num_downsample(self):
+    def num_downsample(self) -> int:
         return self._num_layers
 
     @property
-    def channels(self):
+    def channels(self) -> list[int]:
         return self._channels[::-1]
 
-    def summary(self):
+    def summary(self) -> None:
         """Print model summary."""
         x = tf.keras.layers.Input([self._latent_dim])
         tf.keras.Model(inputs=[x], outputs=self.call(x), name="Generator").summary()

@@ -24,6 +24,8 @@ class ActivationsEnum(str, enum.Enum):
 class ActivationMeta(type):
     """Metaclass for activation function factory."""
 
+    _activations: dict[str, Callable[[tf.Tensor], tf.Tensor]]
+
     def __contains__(cls, x: str) -> bool:
         """Check if activation in dictionary.
 
@@ -32,7 +34,7 @@ class ActivationMeta(type):
         """
         return x in cls._activations
 
-    def __getitem__(cls, x: str) -> Callable:
+    def __getitem__(cls, x: str) -> Callable[[tf.Tensor], tf.Tensor]:
         """Return activation from dictionary.
 
         Args:

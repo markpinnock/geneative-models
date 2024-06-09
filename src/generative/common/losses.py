@@ -20,6 +20,8 @@ class LossesEnum(str, enum.Enum):
 class LossMeta(type):
     """Metaclass for loss function factory."""
 
+    _losses: dict[str, type[tf.keras.losses.Loss]]
+
     def __contains__(cls, x: str) -> bool:
         """Check if loss function in dictionary.
 
@@ -28,7 +30,7 @@ class LossMeta(type):
         """
         return x in cls._losses
 
-    def __getitem__(cls, x: str) -> Callable:
+    def __getitem__(cls, x: str) -> type[tf.keras.losses.Loss]:
         """Return loss function from dictionary.
 
         Args:
