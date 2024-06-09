@@ -1,3 +1,5 @@
+"""Registry class for registering and initialising classes."""
+
 import enum
 from typing import Any
 
@@ -10,6 +12,8 @@ class Categories(str, enum.Enum):
 
 
 class Registry:
+    """Registry class."""
+
     _registry: dict[tuple[str, str], Any] = {}
 
     @classmethod
