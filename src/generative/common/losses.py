@@ -58,3 +58,43 @@ class OriginalBinaryCrossentropy(tf.keras.losses.Loss):
         else:
             labels = tf.zeros_like(fake)
             return -tf.keras.losses.binary_crossentropy(labels, fake, from_logits=True)
+
+
+@Registry.register(Categories.LOSSES, LossTypes.BINARY_CROSSENTROPY)
+class BinaryCrossentropy(tf.keras.losses.Loss):
+    """Modified minmax/BCE GAN loss.
+
+    Notes:
+    ------
+    Better convergence compared to original BCE above according to paper.
+    Discriminator loss: -E{y ln[x] - (1 - y) ln[1 - x]}
+    Generator loss: -E{y ln[1 - x]}
+
+    Goodfellow et al. Generative adversarial networks. NeurIPS, 2014
+    https://arxiv.org/abs/1406.2661
+    """
+
+    def __init__(self, name: str = LossTypes.BINARY_CROSSENTROPY) -> None:
+        super().__init__(name=name)
+
+    def __call__(self, real: tf.Tensor | None, fake: tf.Tensor) -> tf.Tensor:
+        """Calculate loss.
+
+        Args:
+            real: real image discriminator preds (if None, calculates generator loss)
+            fake: fake image discriminator preds
+
+        Returns:
+            loss: loss value
+        """
+        # Calculate discriminator loss
+        if real is not None:
+            labels = tf.concat([tf.ones_like(real), tf.zeros_like(fake)], axis=0)
+            preds = tf.concat([real, fake], axis=0)
+
+        # Calculate generator loss
+        else:
+            labels = tf.ones_like(fake)
+            preds = fake
+
+        return tf.keras.losses.binary_crossentropy(labels, preds, from_logits=True)
