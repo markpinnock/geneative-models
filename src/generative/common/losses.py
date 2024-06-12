@@ -98,3 +98,43 @@ class BinaryCrossentropy(tf.keras.losses.Loss):
             preds = fake
 
         return tf.keras.losses.binary_crossentropy(labels, preds, from_logits=True)
+
+
+@Registry.register(Categories.LOSSES, LossTypes.LEAST_SQUARES)
+class LeastSquares(tf.keras.losses.Loss):
+    """Least squares GAN loss.
+
+    Notes:
+    ------
+    Discriminator loss: -E{y (x - 1)^2 + (1 - y) x^2}
+    Generator loss: -E{y (x - 1)^2}
+
+    Mao et al. Least squares generative adversarial networks
+    Proceedings of the IEEE International Conference on Computer Vision, 2017
+    https://arxiv.org/abs/1611.04076
+    """
+
+    def __init__(self, name: str = LossTypes.BINARY_CROSSENTROPY) -> None:
+        super().__init__(name=name)
+
+    def __call__(self, real: tf.Tensor | None, fake: tf.Tensor) -> tf.Tensor:
+        """Calculate loss.
+
+        Args:
+            real: real image discriminator preds (if None, calculates generator loss)
+            fake: fake image discriminator preds
+
+        Returns:
+            loss: loss value
+        """
+        # Calculate discriminator loss
+        if real is not None:
+            labels = tf.concat([tf.ones_like(real), tf.zeros_like(fake)], axis=0)
+            preds = tf.concat([real, fake], axis=0)
+
+        # Calculate generator loss
+        else:
+            labels = tf.ones_like(fake)
+            preds = fake
+
+        return tf.keras.losses.mean_squared_error(labels, preds)
