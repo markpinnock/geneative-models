@@ -12,6 +12,7 @@ from omegaconf import DictConfig
 from generative.common.activations import ActivationsEnum
 from generative.common.constants import EPSILON, Normalisation
 from generative.common.logger import get_logger
+from generative.common.losses import LossTypes
 
 logger = get_logger(__file__)
 
@@ -230,6 +231,21 @@ def get_dataset(cfg: DictConfig, split: str) -> tf.data.Dataset:
         and cfg.model.generator.output == ActivationsEnum.SIGMOID
     ):
         logger.warning("Generator output is sigmoid but data range is [-1, 1]")
+
+    logger.info(
+        "Loading dataset with: normalisation %s, img_dims %s, batch size %s, n_critic %s",
+        cfg.data.normalisation,
+        cfg.data.img_dims,
+        cfg.data.batch_size,
+        cfg.data.n_critic,
+    )
+
+    if cfg.model.n_critic > 1 and cfg.model.loss != LossTypes.WASSERSTEIN:
+        logger.warning(
+            "Are you sure you want %s loss with N critic %s?",
+            cfg.model.loss,
+            cfg.model.n_critic,
+        )
 
     if cfg.data.dataloader == FROM_FILE:
         return get_dataset_from_file(cfg.data, split)
