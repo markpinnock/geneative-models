@@ -1,3 +1,5 @@
+"""Abstract base class for GANs."""
+
 import abc
 
 import tensorflow as tf
@@ -8,6 +10,13 @@ from generative.common.registry import Categories, Registry
 
 
 class BaseGAN(tf.keras.Model, abc.ABC):
+    """Abstract base class for GANs.
+
+    Args:
+    ----
+    cfg: config
+    """
+
     discriminator: tf.keras.layers.Layer
     generator: tf.keras.layers.Layer
 
@@ -22,6 +31,12 @@ class BaseGAN(tf.keras.Model, abc.ABC):
         )
 
     def compile(self, cfg: DictConfig) -> None:
+        """Compile Keras model.
+
+        Args:
+        ----
+        cfg: configuration object
+        """
         super().compile(run_eagerly=False)
 
         if cfg.generator.opt not in Optimiser or cfg.discriminator.opt not in Optimiser:
@@ -39,7 +54,7 @@ class BaseGAN(tf.keras.Model, abc.ABC):
         self._g_metric = tf.keras.metrics.Mean(name="g_metric")
 
     def generator_step(self) -> None:
-        """Generator training"""
+        """Generator training step."""
 
         latent_noise = tf.random.normal(
             (self._mb_size, self._latent_dim),
@@ -61,7 +76,12 @@ class BaseGAN(tf.keras.Model, abc.ABC):
         self._g_metric.update_state(loss)
 
     def discriminator_step(self, real_images: tf.Tensor) -> None:
-        """Discriminator training"""
+        """Discriminator training step.
+
+        Args:
+        ----
+        real_images: tensor of real images
+        """
 
         # Select minibatch of real images and generate fake images
         real_mb_size = tf.shape(real_images)[0]
@@ -91,6 +111,14 @@ class BaseGAN(tf.keras.Model, abc.ABC):
 
     @abc.abstractmethod
     def train_step(self, data: tf.Tensor) -> tf.Tensor:
+        """Perform one train step for DCGAN.
+
+        Args:
+            real_images: batch of real images
+
+        Returns:
+            dictionary of losses
+        """
         raise NotImplementedError
 
     def summary(self) -> None:
@@ -100,6 +128,14 @@ class BaseGAN(tf.keras.Model, abc.ABC):
 
     @abc.abstractmethod
     def call(self, x: tf.Tensor) -> tf.Tensor:
+        """Generate fake images from random noise.
+
+        Args:
+            num_examples: number of examples to generate (uses fixed noise if None)
+
+        Returns:
+            generated fake images
+        """
         raise NotImplementedError
 
     @property
