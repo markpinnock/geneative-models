@@ -3,8 +3,8 @@ import abc
 import tensorflow as tf
 from omegaconf import DictConfig
 
-from generative.common.losses import Loss
 from generative.common.optimisers import Optimiser
+from generative.common.registry import Categories, Registry
 
 
 class BaseGAN(tf.keras.Model, abc.ABC):
@@ -34,7 +34,7 @@ class BaseGAN(tf.keras.Model, abc.ABC):
             **cfg.discriminator.opt_h_params,
         )
 
-        self._loss = Loss[cfg.loss](from_logits=True)
+        self._loss = Registry.build(Categories.LOSSES, cfg.loss, None)
         self._d_metric = tf.keras.metrics.Mean(name="d_metric")
         self._g_metric = tf.keras.metrics.Mean(name="g_metric")
 
@@ -45,13 +45,12 @@ class BaseGAN(tf.keras.Model, abc.ABC):
             (self._mb_size, self._latent_dim),
             dtype="float32",
         )
-        labels = tf.ones(self._mb_size)
 
         # Get gradients from discriminator predictions and update weights
         with tf.GradientTape() as tape:
             fake_images = self.generator(latent_noise, training=True)
             pred = self.discriminator(fake_images, training=True)
-            loss = self._loss(labels, pred)
+            loss = self._loss(real=None, fake=pred)
 
         grads = tape.gradient(loss, self.generator.trainable_variables)
         self._g_optimiser.apply_gradients(
@@ -65,21 +64,22 @@ class BaseGAN(tf.keras.Model, abc.ABC):
         """Discriminator training"""
 
         # Select minibatch of real images and generate fake images
+        real_mb_size = tf.shape(real_images)[0]
         latent_noise = tf.random.normal(
-            (tf.shape(real_images)[0], self._latent_dim),
+            (real_mb_size, self._latent_dim),
             dtype="float32",
         )
+
         fake_images = self.generator(latent_noise, training=True)
         input_batch = tf.concat([real_images, fake_images], axis=0)
-        labels = tf.concat(
-            [tf.ones(tf.shape(real_images)[0]), tf.zeros(tf.shape(fake_images)[0])],
-            axis=0,
-        )
 
         # Get gradients from discriminator predictions and update weights
         with tf.GradientTape() as tape:
             pred = self.discriminator(input_batch, training=True)
-            loss = self._loss(labels, pred)
+            loss = self._loss(
+                real=pred[0:real_mb_size, ...],
+                fake=pred[real_mb_size:, ...],
+            )
 
         grads = tape.gradient(loss, self.discriminator.trainable_variables)
         self._d_optimiser.apply_gradients(
