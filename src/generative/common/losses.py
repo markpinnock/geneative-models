@@ -15,6 +15,7 @@ class LossTypes(str, enum.Enum):
     BINARY_CROSSENTROPY = "binary_crossentropy"
     ORIGINAL_BINARY_CROSSENTROPY = "original_binary_crossentropy"
     LEAST_SQUARES = "least_squares"
+    WASSERSTEIN = "wasserstein"
 
     def __str__(self) -> str:
         """Get string representation."""
@@ -28,7 +29,7 @@ class OriginalBinaryCrossentropy(tf.keras.losses.Loss):
     Notes:
     ------
     Poorer convergence compared to modified BCE below according to paper.
-    Discriminator loss: -E{y ln[x] + (1 - y) ln[1 - x]}
+    Discriminator loss: -E{ln[x] + (1 - y) ln[1 - x]}
     Generator loss: E{(1 - y) ln[1 - x]}
 
     Goodfellow et al. Generative adversarial networks. NeurIPS, 2014
@@ -67,7 +68,7 @@ class BinaryCrossentropy(tf.keras.losses.Loss):
     Notes:
     ------
     Better convergence compared to original BCE above according to paper.
-    Discriminator loss: -E{y ln[x] - (1 - y) ln[1 - x]}
+    Discriminator loss: -E{y ln[x] + (1 - y) ln[1 - x]}
     Generator loss: -E{y ln[1 - x]}
 
     Goodfellow et al. Generative adversarial networks. NeurIPS, 2014
@@ -106,8 +107,8 @@ class LeastSquares(tf.keras.losses.Loss):
 
     Notes:
     ------
-    Discriminator loss: -E{y (x - 1)^2 + (1 - y) x^2}
-    Generator loss: -E{y (x - 1)^2}
+    Discriminator loss: E{y (x - 1)^2 + (1 - y) x^2}
+    Generator loss: E{y (x - 1)^2}
 
     Mao et al. Least squares generative adversarial networks
     Proceedings of the IEEE International Conference on Computer Vision, 2017
