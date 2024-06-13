@@ -164,7 +164,7 @@ def get_dataset_from_file(cfg: DictConfig, split: str) -> tf.data.Dataset:
 
     dataset = tf.data.Dataset.from_tensor_slices(dataset_tf)
 
-    return dataset.shuffle(dataset_size).batch(cfg.batch_size)
+    return dataset.shuffle(dataset_size).batch(cfg.batch_size * cfg.n_critic)
 
 
 def get_dataset_from_folder(cfg: DictConfig) -> tf.data.Dataset:
@@ -193,7 +193,7 @@ def get_dataset_from_folder(cfg: DictConfig) -> tf.data.Dataset:
         data_dir,
         labels=None,
         color_mode="rgb",
-        batch_size=cfg.batch_size,
+        batch_size=cfg.batch_size * cfg.n_critic,
         image_size=tuple(cfg.img_dims),
         shuffle=True,
         seed=None,
