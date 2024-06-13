@@ -139,7 +139,7 @@ def test_get_dataset_from_folder(
     normalisation: str,
     batch_size: int,
 ) -> None:
-    """Test loading dataset from file."""
+    """Test loading dataset from folder."""
     cfg = DictConfig(
         {
             "img_dims": img_dims,
@@ -162,3 +162,49 @@ def test_get_dataset_from_folder(
     else:
         assert tf.reduce_min(img_batch) == 0.0
     assert tf.reduce_max(img_batch) == 1.0
+
+
+@pytest.mark.parametrize("batch_size,n_critic",[(1, 1), (2, 1), (1, 2), (2, 2)])
+def test_get_dataset_from_file_ncritic(
+    create_test_dataset_file: Path,
+    batch_size: int,
+    n_critic: int,
+) -> None:
+    """Test loading dataset from file with N_critic * batch size."""
+    cfg = DictConfig(
+        {
+            "img_dims": [4, 4],
+            "normalisation": Normalisation.NEG_ONE_ONE,
+            "data_dir": create_test_dataset_file.parent,
+            "dataset_name": "dataset",
+            "batch_size": batch_size,
+            "n_critic": n_critic,
+        },
+    )
+    dataset = get_dataset_from_file(cfg, DataSplits.TRAIN, n_critic)
+    img_batch = next(iter(dataset))
+
+    assert img_batch.shape[0] == batch_size * n_critic
+
+
+@pytest.mark.parametrize("batch_size,n_critic",[(1, 1), (2, 1), (1, 2), (2, 2)])
+def test_get_dataset_from_folder_ncritic(
+    create_test_dataset_folder: Path,
+    batch_size: int,
+    n_critic: int,
+) -> None:
+    """Test loading dataset from file with N_critic * batch size."""
+    cfg = DictConfig(
+        {
+            "img_dims": [4, 4],
+            "normalisation": Normalisation.NEG_ONE_ONE,
+            "data_dir": create_test_dataset_folder,
+            "dataset_name": "dataset",
+            "batch_size": batch_size,
+            "n_critic": n_critic,
+        },
+    )
+    dataset = get_dataset_from_folder(cfg, n_critic)
+    img_batch = next(iter(dataset))
+
+    assert img_batch.shape[0] == batch_size * n_critic
