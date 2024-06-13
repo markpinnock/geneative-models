@@ -123,13 +123,18 @@ def resize_dataset(img_dims: list[int], dataset: tf.Tensor) -> tf.Tensor:
     return tf.cast(dataset, tf.float32)
 
 
-def get_dataset_from_file(cfg: DictConfig, split: str) -> tf.data.Dataset:
+def get_dataset_from_file(
+    cfg: DictConfig,
+    split: str,
+    n_critic: int = 1,
+) -> tf.data.Dataset:
     """Get dataset from a single file.
 
     Args:
     ----
         cfg: config
         split: one of `train`, `valid` or `test`
+        n_critic: number of dicsriminator iterations (set to 1 if not Wasserstein GAN)
 
     Returns:
     -------
@@ -165,16 +170,17 @@ def get_dataset_from_file(cfg: DictConfig, split: str) -> tf.data.Dataset:
 
     dataset = tf.data.Dataset.from_tensor_slices(dataset_tf)
 
-    return dataset.shuffle(dataset_size).batch(cfg.batch_size * cfg.n_critic)
+    return dataset.shuffle(dataset_size).batch(cfg.batch_size * n_critic)
 
 
-def get_dataset_from_folder(cfg: DictConfig) -> tf.data.Dataset:
+def get_dataset_from_folder(cfg: DictConfig, n_critic: int = 1) -> tf.data.Dataset:
     """Get dataset from a folder of images.
 
     Args:
     ----
         cfg: config
         split: one of `train`, `valid` or `test`
+        n_critic: number of dicsriminator iterations (set to 1 if not Wasserstein GAN)
 
     Returns:
     -------
@@ -194,7 +200,7 @@ def get_dataset_from_folder(cfg: DictConfig) -> tf.data.Dataset:
         data_dir,
         labels=None,
         color_mode="rgb",
-        batch_size=cfg.batch_size * cfg.n_critic,
+        batch_size=cfg.batch_size * n_critic,
         image_size=tuple(cfg.img_dims),
         shuffle=True,
         seed=None,
@@ -248,8 +254,8 @@ def get_dataset(cfg: DictConfig, split: str) -> tf.data.Dataset:
         )
 
     if cfg.data.dataloader == FROM_FILE:
-        return get_dataset_from_file(cfg.data, split)
+        return get_dataset_from_file(cfg.data, split, cfg.n_critic)
     elif cfg.data.dataloader == FROM_FOLDER:
-        return get_dataset_from_folder(cfg.data)
+        return get_dataset_from_folder(cfg.data, cfg.n_critic)
     else:
         raise ValueError(f"Dataset '{cfg.data.dataloader}' not supported.")
