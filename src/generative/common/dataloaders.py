@@ -246,16 +246,19 @@ def get_dataset(cfg: DictConfig, split: str) -> tf.data.Dataset:
         cfg.data.n_critic,
     )
 
-    if cfg.model.n_critic > 1 and cfg.model.loss != LossTypes.WASSERSTEIN:
+    # Allow Wasserstein GAN if necessary
+    n_critic = cfg.model.get("n_critic", 1)
+
+    if n_critic > 1 and cfg.model.loss != LossTypes.WASSERSTEIN:
         logger.warning(
             "Are you sure you want %s loss with N critic %s?",
             cfg.model.loss,
-            cfg.model.n_critic,
+            n_critic,
         )
 
     if cfg.data.dataloader == FROM_FILE:
-        return get_dataset_from_file(cfg.data, split, cfg.n_critic)
+        return get_dataset_from_file(cfg.data, split, n_critic)
     elif cfg.data.dataloader == FROM_FOLDER:
-        return get_dataset_from_folder(cfg.data, cfg.n_critic)
+        return get_dataset_from_folder(cfg.data, n_critic)
     else:
         raise ValueError(f"Dataset '{cfg.data.dataloader}' not supported.")
