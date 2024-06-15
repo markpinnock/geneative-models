@@ -5,7 +5,10 @@ from typing import Callable
 
 import tensorflow as tf
 
+from generative.common.logger import get_logger
 from generative.common.registry import Categories, Registry
+
+logger = get_logger(__file__)
 
 
 @enum.unique
@@ -38,6 +41,7 @@ class OriginalBinaryCrossentropy(tf.keras.losses.Loss):
 
     def __init__(self, name: str = LossTypes.ORIGINAL_BINARY_CROSSENTROPY) -> None:
         super().__init__(name=name)
+        logger.info("Using %s loss", LossTypes.ORIGINAL_BINARY_CROSSENTROPY)
 
     def __call__(self, real: tf.Tensor | None, fake: tf.Tensor) -> tf.Tensor:
         """Calculate loss.
@@ -77,6 +81,7 @@ class BinaryCrossentropy(tf.keras.losses.Loss):
 
     def __init__(self, name: str = LossTypes.BINARY_CROSSENTROPY) -> None:
         super().__init__(name=name)
+        logger.info("Using %s loss", LossTypes.BINARY_CROSSENTROPY)
 
     def __call__(self, real: tf.Tensor | None, fake: tf.Tensor) -> tf.Tensor:
         """Calculate loss.
@@ -110,13 +115,13 @@ class LeastSquares(tf.keras.losses.Loss):
     Discriminator loss: E{y (x - 1)^2 + (1 - y) x^2}
     Generator loss: E{y (x - 1)^2}
 
-    Mao et al. Least squares generative adversarial networks
-    Proceedings of the IEEE International Conference on Computer Vision, 2017
+    Mao et al. Least squares generative adversarial networks. ICCV, 2017
     https://arxiv.org/abs/1611.04076
     """
 
-    def __init__(self, name: str = LossTypes.BINARY_CROSSENTROPY) -> None:
+    def __init__(self, name: str = LossTypes.LEAST_SQUARES) -> None:
         super().__init__(name=name)
+        logger.info("Using %s loss", LossTypes.LEAST_SQUARES)
 
     def __call__(self, real: tf.Tensor | None, fake: tf.Tensor) -> tf.Tensor:
         """Calculate loss.
