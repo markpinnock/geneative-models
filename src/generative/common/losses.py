@@ -144,3 +144,40 @@ class LeastSquares(tf.keras.losses.Loss):
             preds = fake
 
         return tf.keras.losses.mean_squared_error(labels, preds)
+
+
+@Registry.register(Categories.LOSSES, LossTypes.WASSERSTEIN)
+class Wasserstein(tf.keras.losses.Loss):
+    """Wasserstein GAN loss.
+
+    Notes:
+    ------
+    Discriminator loss: -E{y (x - 1)^2 + (1 - y) x^2}
+    Generator loss: -E{y (x - 1)^2}
+
+    Arjovsky et al. Wasserstein generative adversarial networks. ICML, 2017.
+    https://arxiv.org/abs/1701.07875
+    """
+
+    def __init__(self, name: str = LossTypes.WASSERSTEIN) -> None:
+        super().__init__(name=name)
+        logger.info("Using %s loss", LossTypes.WASSERSTEIN)
+
+    def __call__(self, real: tf.Tensor | None, fake: tf.Tensor) -> tf.Tensor:
+        """Calculate loss.
+
+        Args:
+            real: real image discriminator preds (if None, calculates generator loss)
+            fake: fake image discriminator preds
+
+        Returns:
+            loss: loss value
+        """
+
+        # Calculate discriminator loss
+        if real is not None:
+            return tf.reduce_mean(fake - real)
+
+        # Calculate generator loss
+        else:
+            return tf.reduce_mean(-fake)
