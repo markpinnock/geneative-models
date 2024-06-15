@@ -7,9 +7,10 @@ from omegaconf import DictConfig
 
 from generative.common.optimisers import Optimiser
 from generative.common.registry import Categories, Registry
+from generative.gans.wasserstein import GANMetaclass
 
 
-class BaseGAN(tf.keras.Model, abc.ABC):
+class BaseGAN(tf.keras.Model, metaclass=GANMetaclass):
     """Abstract base class for GANs.
 
     Args:
@@ -29,6 +30,16 @@ class BaseGAN(tf.keras.Model, abc.ABC):
             (cfg.num_examples, cfg.latent_dim),
             dtype="float32",
         )
+
+    @abc.abstractmethod
+    def build_generator(self, cfg: DictConfig, **kwargs: str) -> None:
+        """Build generator using config and additional arguments."""
+        raise ValueError
+
+    @abc.abstractmethod
+    def build_discriminator(self, cfg: DictConfig, **kwargs: str) -> None:
+        """Build discriminator using config and additional arguments."""
+        raise ValueError
 
     def compile(self, cfg: DictConfig) -> None:
         """Compile Keras model.
