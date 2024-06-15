@@ -56,6 +56,7 @@ class DownBlock(tf.keras.layers.Layer):
         batchnorm: bool = True,
         final: bool = False,
         name: str | None = None,
+        **kwargs,
     ) -> None:
         super().__init__(name=name)
         if activation not in Activation:
@@ -71,6 +72,7 @@ class DownBlock(tf.keras.layers.Layer):
                 padding="VALID",
                 kernel_initializer=initialiser,
                 name="conv",
+                **kwargs,
             )
 
         # Otherwise, use same padding and stride
@@ -82,6 +84,7 @@ class DownBlock(tf.keras.layers.Layer):
                 padding="SAME",
                 kernel_initializer=initialiser,
                 name="conv",
+                **kwargs,
             )
 
         # Optionally add batch normalisation
@@ -120,6 +123,7 @@ class UpBlock(tf.keras.layers.Layer):
         batchnorm: bool = True,
         first: bool = False,
         name: str | None = None,
+        **kwargs,
     ) -> None:
         super().__init__(name=name)
         if activation not in Activation:
@@ -135,6 +139,7 @@ class UpBlock(tf.keras.layers.Layer):
                 padding="VALID",
                 kernel_initializer=initialiser,
                 name="conv",
+                **kwargs,
             )
 
         # Otherwise, use same padding and stride
@@ -146,6 +151,7 @@ class UpBlock(tf.keras.layers.Layer):
                 padding="SAME",
                 kernel_initializer=initialiser,
                 name="conv",
+                **kwargs,
             )
 
         # Optionally add batch normalisation
@@ -172,9 +178,10 @@ class Discriminator(tf.keras.Model):
         name: model name
     """
 
-    def __init__(self, cfg: DictConfig, name: str = "discriminator"):
+    def __init__(self, cfg: DictConfig, name: str = "discriminator", **kwargs):
         super().__init__(name=name)
         initialiser = tf.keras.initializers.RandomNormal(0, 0.02)
+        constraint = kwargs.get("constraint", None)
         self.blocks = []
 
         # Get start and end resolutions
@@ -203,6 +210,7 @@ class Discriminator(tf.keras.Model):
                 batchnorm=False,
                 final=False,
                 name=f"dn0",
+                kernel_constraint=constraint,
             ),
         )
 
@@ -215,6 +223,7 @@ class Discriminator(tf.keras.Model):
                     batchnorm=True,
                     final=False,
                     name=f"dn{i}",
+                    kernel_constraint=constraint,
                 ),
             )
 
@@ -227,6 +236,7 @@ class Discriminator(tf.keras.Model):
                     activation=cfg.discriminator.activation,
                     kernel_initializer=initialiser,
                     name="dense",
+                    kernel_constraint=constraint,
                 ),
             )
 
@@ -238,6 +248,7 @@ class Discriminator(tf.keras.Model):
                     activation="linear",
                     final=True,
                     name="final",
+                    kernel_constraint=constraint,
                 ),
             )
 
