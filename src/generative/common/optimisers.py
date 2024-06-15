@@ -11,6 +11,7 @@ class OptimisersEnum(str, enum.Enum):
     """Optimiser types."""
 
     ADAM = "adam"
+    RMSPROP = "rmsprop"
 
     def __str__(self) -> str:
         """Get string representation."""
@@ -44,4 +45,5 @@ class Optimiser(metaclass=OptimiserMeta):
 
     _optimisers = {
         OptimisersEnum.ADAM: tf.keras.optimizers.Adam,
+        OptimisersEnum.RMSPROP: tf.keras.optimizers.RMSprop,
     }
