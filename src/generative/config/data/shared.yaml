@@ -1,4 +1,5 @@
 data_dir: null
 batch_size: ${batch_size}
 img_dims: ${img_dims}
+n_critic: ${model.n_critic}  # Number of Wasserstein discriminator training steps
 normalisation: "-11"  # Data normalisation type

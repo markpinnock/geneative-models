@@ -2,4 +2,5 @@
 batch_size: ${batch_size}
 img_dims: ${data.img_dims}  # Image dimensions
 max_channels: 512  # Maximum number of channels
+n_critic: 1  # Number of Wasserstein discriminator training steps
 num_examples: 16  # Number of examples to generate

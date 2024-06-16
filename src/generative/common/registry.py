@@ -8,6 +8,7 @@ from omegaconf import DictConfig
 
 @enum.unique
 class Categories(str, enum.Enum):
+    LOSSES = "losses"
     MODELS = "models"
 
 
@@ -50,7 +51,7 @@ class Registry:
         return inner
 
     @classmethod
-    def build(cls, category: str, name: str, cfg: DictConfig) -> Any:
+    def build(cls, category: str, name: str, cfg: DictConfig | None) -> Any:
         """Initialise and return required class.
 
         Args:
@@ -61,4 +62,7 @@ class Registry:
         Returns:
             initialised class
         """
-        return cls.get(category, name)(cfg)
+        if cfg is None:
+            return cls.get(category, name)()
+        else:
+            return cls.get(category, name)(cfg)

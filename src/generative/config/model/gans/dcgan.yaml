@@ -9,9 +9,9 @@ discriminator:
   activation: leaky_relu  # Activation function
   channels: 64  # Number of channels in first layer
   dense: false  # Use dense layer before output
-  opt: adam  # Optimiser [adam]
+  opt: adam  # Optimiser ["adam", "rmsprop"]
   opt_h_params:  # Optimiser hyperparameters
-    learning_rate: 0.0002
+    learning_rate: 2e-4
     beta_1: 0.5
     beta_2: 0.999
 
@@ -21,11 +21,28 @@ generator:
   channels: 64  # Number of channels in first layer
   dense: false  # Use dense layer after latent noise
   output: tanh  # Output activation function
-  opt: adam  # Optimiser [adam]
+  opt: adam  # Optimiser ["adam", "rmsprop"]
   opt_h_params:  # Optimiser hyperparameters
-    learning_rate: 0.0002
+    learning_rate: 2e-4
     beta_1: 0.5
     beta_2: 0.999
 
 latent_dim: 100  # Latent noise dimension
 loss: binary_crossentropy  # Loss function
+
+# Wasserstein-specific parameters
+wasserstein_type: gradient_penalty  # ["clip_weights", "gradient_penalty"]
+n_critic: 5  # Number of critic updates per generator update
+clip_value: 0.01  # Standard WGAN clip value 0.01
+gradient_penalty: 10  # Gradient penalty coefficient for WGAN-GP
+drift_term: 0.0  # Not used in WGAN-GP (see Progressive GAN)
+
+# Default optimiser settings
+
+#        | BCE DCGAN | WGAN    | WGAN-GP
+# --------------------------------------
+# Opt    | Adam      | RMSProp | Adam
+# lr     | 2e-4      | 5e-5    | 1e-4
+# beta_1 | 0.5       |    -    | 0.0
+# beta_2 | 0.999     |    -    | 0.9
+# --------------------------------------
