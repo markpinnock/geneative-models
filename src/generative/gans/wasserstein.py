@@ -112,6 +112,7 @@ class WassersteinMixin:
         elif cfg.wasserstein_type == WassersteinTypes.GRADIENT_PENALTY:
             self._drift_term_coeff = cfg.get("drift_term", 0.0)
             self._gradient_penalty_coeff = cfg.gradient_penalty
+            logger.info("Using gradient penalty: %s", cfg.gradient_penalty)
 
     def discriminator_step(self, real_images: tf.Tensor) -> None:
         """WGAN/WGAN-GP Discriminator training step.
