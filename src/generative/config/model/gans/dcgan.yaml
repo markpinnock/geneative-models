@@ -21,11 +21,16 @@ generator:
   channels: 64  # Number of channels in first layer
   dense: false  # Use dense layer after latent noise
   output: tanh  # Output activation function
-  opt: adam  # Optimiser [adam]
+  opt: rmsprop  # Optimiser ["adam", "rmsprop"]
   opt_h_params:  # Optimiser hyperparameters
-    learning_rate: 0.0002
-    beta_1: 0.5
-    beta_2: 0.999
+    learning_rate: 5e-5  # Adam default 2e-4
+    # beta_1: 0.5
+    # beta_2: 0.999
 
 latent_dim: 100  # Latent noise dimension
 loss: binary_crossentropy  # Loss function
+
+# Wasserstein-specific parameters
+wasserstein_type: clip_weights
+n_critic: 5  # Number of critic updates per generator update
+clip_value: 0.01  # Standard Wasserstein clip value 0.01
