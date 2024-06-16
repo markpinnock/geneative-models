@@ -15,3 +15,4 @@ data:
 
 model:
   latent_dim: 100  # Latent dimension
+  loss: binary_crossentropy
