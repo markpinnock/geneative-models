@@ -52,7 +52,7 @@ class GANMetaclass(abc.ABCMeta):
 
 
 class WeightClipConstraint(tf.keras.constraints.Constraint):
-    """Clip weights in Wasserstein GAN discriminator.
+    """Clip weights in original Wasserstein GAN discriminator.
 
     Notes:
     -----
@@ -96,23 +96,25 @@ class WassersteinMixin:
     _latent_dim: int
     _loss: tf.keras.losses.Loss
     _mb_size: int
-    _n_critic: int
 
     def __init__(self, cfg: DictConfig):
         super().__init__(cfg)  # type: ignore[call-arg]
         self._n_critic = cfg.n_critic
+        self._gradient_penalty_coeff = None
 
         if cfg.wasserstein_type == WassersteinTypes.CLIP_WEIGHTS:
             constraint = WeightClipConstraint(cfg.clip_value)
             logger.info("Using weight clipping: %s", cfg.clip_value)
 
-            if cfg.n_critic == 1:
-                logger.warning("Using N critic %s with weight clipping - are you sure?")
-
+            # Override discriminator already built by subclass
             self.build_discriminator(cfg, constraint=constraint)  # type: ignore[attr-defined]
 
+        elif cfg.wasserstein_type == WassersteinTypes.GRADIENT_PENALTY:
+            self._drift_term_coeff = cfg.get("drift_term", 0.0)
+            self._gradient_penalty_coeff = cfg.gradient_penalty
+
     def discriminator_step(self, real_images: tf.Tensor) -> None:
-        """Discriminator training step.
+        """WGAN/WGAN-GP Discriminator training step.
 
         Args:
         ----
@@ -148,6 +150,10 @@ class WassersteinMixin:
                     fake=pred[real_mb_size:, ...],
                 )
 
+                # Gradient penalty if indicated
+                if self._gradient_penalty_coeff:
+                    loss += self.apply_gradient_penalty(real_batch, fake_images)
+
             grads = tape.gradient(loss, self.discriminator.trainable_variables)
             self._d_optimiser.apply_gradients(
                 zip(grads, self.discriminator.trainable_variables),
@@ -156,6 +162,55 @@ class WassersteinMixin:
             # Update metrics
             self._d_metric.update_state(loss)
 
+    def apply_gradient_penalty(
+        self,
+        real_images: tf.Tensor,
+        fake_images: tf.Tensor,
+    ) -> tf.Tensor:
+        """Apply gradient penalty from WGAN-GP.
+
+        Notes:
+        -----
+        Gulrajani et al. Improved training of Wasserstein GANs. NeurIPS, 2017.
+        https://arxiv.org/abs/1704.00028
+
+        Args:
+        ----
+        real_images: tensor of real images
+        fake_images: tensor of fake images
+
+        """
+        # Prevents discriminator output from drifting too far from zero (Progressive GAN)
+        drift_term = tf.reduce_mean(tf.square(self.discriminator(real_images)))
+
+        # Calculate random weighting of real and fake images
+        epsilon = tf.random.uniform([tf.shape(fake_images)[0], 1, 1, 1], 0.0, 1.0)
+        x_hat = epsilon * real_images + (1 - epsilon) * fake_images
+
+        # Get discriminator output from real/fake images
+        with tf.GradientTape() as tape:
+            tape.watch(x_hat)
+            D_hat = self.discriminator(x_hat, training=True)
+
+        # Calculate gradients of output w.r.t. real/fake images
+        gradients = tape.gradient(D_hat, x_hat)
+        grad_penalty = self.calc_gradient_penalty(gradients)
+
+        return (
+            self._gradient_penalty_coeff * grad_penalty
+            + self._drift_term_coeff * drift_term
+        )
+
+    def calc_gradient_penalty(self, gradients: tf.Tensor) -> tf.Tensor:
+        grad_norm = tf.sqrt(tf.reduce_sum(tf.square(gradients), axis=[1, 2, 3]) + 1e-8)
+        grad_penalty = tf.reduce_mean(tf.square(grad_norm - 1))
+
+        return grad_penalty
+
     @property
     def n_critic(self) -> int:
-        return self._n_critic
+        return int(self._n_critic)
+
+    @property
+    def gradient_penalty(self) -> int | float | None:
+        return self._gradient_penalty_coeff
