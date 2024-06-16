@@ -12,7 +12,3 @@ save_freq: 10  # Save every N epochs
 
 data:
   img_dims: null  # Image dimensions
-
-model:
-  latent_dim: 100  # Latent dimension
-  loss: binary_crossentropy
