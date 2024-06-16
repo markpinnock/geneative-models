@@ -9,9 +9,9 @@ discriminator:
   activation: leaky_relu  # Activation function
   channels: 64  # Number of channels in first layer
   dense: false  # Use dense layer before output
-  opt: adam  # Optimiser [adam]
+  opt: adam  # Optimiser ["adam", "rmsprop"]
   opt_h_params:  # Optimiser hyperparameters
-    learning_rate: 0.0002
+    learning_rate: 2e-4  # Adam 2e-4, RMSProp 5e-5
     beta_1: 0.5
     beta_2: 0.999
 
@@ -21,11 +21,11 @@ generator:
   channels: 64  # Number of channels in first layer
   dense: false  # Use dense layer after latent noise
   output: tanh  # Output activation function
-  opt: rmsprop  # Optimiser ["adam", "rmsprop"]
+  opt: adam  # Optimiser ["adam", "rmsprop"]
   opt_h_params:  # Optimiser hyperparameters
-    learning_rate: 5e-5  # Adam default 2e-4
-    # beta_1: 0.5
-    # beta_2: 0.999
+    learning_rate: 2e-4  # Adam 2e-4, RMSProp 5e-5
+    beta_1: 0.5
+    beta_2: 0.999
 
 latent_dim: 100  # Latent noise dimension
 loss: binary_crossentropy  # Loss function
