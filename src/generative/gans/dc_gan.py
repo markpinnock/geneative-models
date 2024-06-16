@@ -23,7 +23,7 @@ class DCDense(tf.keras.layers.Layer):
         name: layer name
     """
 
-    def __init__(self, activation: str, **kwargs: int | str) -> None:
+    def __init__(self, activation: str, **kwargs: str | int | None) -> None:
         super().__init__(name=kwargs["name"])
         self.dense = tf.keras.layers.Dense(**kwargs)
         if activation not in Activation:
@@ -56,7 +56,7 @@ class DownBlock(tf.keras.layers.Layer):
         batchnorm: bool = True,
         final: bool = False,
         name: str | None = None,
-        **kwargs,
+        **kwargs: str | None,
     ) -> None:
         super().__init__(name=name)
         if activation not in Activation:
@@ -123,7 +123,7 @@ class UpBlock(tf.keras.layers.Layer):
         batchnorm: bool = True,
         first: bool = False,
         name: str | None = None,
-        **kwargs,
+        **kwargs: str | None,
     ) -> None:
         super().__init__(name=name)
         if activation not in Activation:
@@ -178,7 +178,12 @@ class Discriminator(tf.keras.Model):
         name: model name
     """
 
-    def __init__(self, cfg: DictConfig, name: str = "discriminator", **kwargs):
+    def __init__(
+        self,
+        cfg: DictConfig,
+        name: str = "discriminator",
+        **kwargs: str | None,
+    ):
         super().__init__(name=name)
         initialiser = tf.keras.initializers.RandomNormal(0, 0.02)
         constraint = kwargs.get("constraint", None)
@@ -392,8 +397,16 @@ class DCGAN(BaseGAN):
 
     def __init__(self, cfg: DictConfig) -> None:
         super().__init__(cfg)
-        self.generator = Generator(cfg)
-        self.discriminator = Discriminator(cfg)
+        self.build_generator(cfg)
+        self.build_discriminator(cfg, constraint=None)  # type: ignore[arg-type]
+
+    def build_generator(self, cfg: DictConfig, **kwargs: str) -> None:
+        """Build generator using config and additional arguments."""
+        self.generator = Generator(cfg, **kwargs)
+
+    def build_discriminator(self, cfg: DictConfig, **kwargs: str) -> None:
+        """Build discriminator using config and additional arguments."""
+        self.discriminator = Discriminator(cfg, **kwargs)
 
     @tf.function
     def train_step(self, real_images: tf.Tensor) -> dict[str, tf.Tensor]:
